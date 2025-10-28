@@ -44,6 +44,31 @@ function normalizeOutput(output: string): string {
   return output.trim().replace(/\r\n/g, '\n');
 }
 
+/**
+ * Flexible output comparison that handles locale differences
+ * - Accepts both "14.17" and "14,17" as equivalent
+ * - Normalizes whitespace and newlines
+ */
+function compareOutputs(expected: string, actual: string): boolean {
+  const normalizedExpected = normalizeOutput(expected);
+  const normalizedActual = normalizeOutput(actual);
+  
+  // Direct match
+  if (normalizedExpected === normalizedActual) {
+    return true;
+  }
+  
+  // Try swapping decimal separators (. <-> ,)
+  const expectedWithComma = normalizedExpected.replace(/\./g, ',');
+  const expectedWithPeriod = normalizedExpected.replace(/,/g, '.');
+  
+  if (expectedWithComma === normalizedActual || expectedWithPeriod === normalizedActual) {
+    return true;
+  }
+  
+  return false;
+}
+
 async function fileExists(filePath: string): Promise<boolean> {
   try {
     return await fs.pathExists(filePath);
@@ -155,7 +180,7 @@ export async function checkSetupExercise(
       
       const actualOutput = normalizeOutput(result.stdout);
       const expectedOutput = normalizeOutput(setup.expectedOutput);
-      const outputMatch = actualOutput === expectedOutput;
+      const outputMatch = compareOutputs(setup.expectedOutput, result.stdout);
       
       if (outputMatch) {
         log('✅ Output matches expected');
@@ -307,7 +332,7 @@ export async function checkExercise(
       
       const actualOutput = normalizeOutput(result.stdout);
       const expectedOutput = normalizeOutput(exercise.expectedOutput);
-      const outputMatch = actualOutput === expectedOutput;
+      const outputMatch = compareOutputs(exercise.expectedOutput, result.stdout);
       
       if (outputMatch) {
         log('✅ Output matches expected');

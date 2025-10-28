@@ -27,6 +27,36 @@ export class Logger {
     this.logDir = logDir;
   }
   
+  private formatErrorMessage(result: LogEntry['results'][0]): string {
+    if (result.passed) {
+      return 'OK';
+    }
+    
+    // If there's a specific error message (file not found, compilation error, etc.)
+    if (result.error && !result.expectedOutput && !result.actualOutput) {
+      return result.error;
+    }
+    
+    // If we have expected vs actual output
+    if (result.expectedOutput !== undefined && result.actualOutput !== undefined) {
+      const expected = result.expectedOutput.trim();
+      const actual = result.actualOutput.trim();
+      
+      // If both are short enough, show inline
+      if (expected.length <= 30 && actual.length <= 30) {
+        return `Expected: "${expected}" | Got: "${actual}"`;
+      }
+      
+      // If too long, show truncated
+      const expectedShort = expected.substring(0, 30) + (expected.length > 30 ? '...' : '');
+      const actualShort = actual.substring(0, 30) + (actual.length > 30 ? '...' : '');
+      return `Expected: "${expectedShort}" | Got: "${actualShort}"`;
+    }
+    
+    // Fallback to error message or generic FAIL
+    return result.error || 'FAIL';
+  }
+  
   async ensureLogDir(): Promise<void> {
     await fs.ensureDir(this.logDir);
   }
@@ -92,31 +122,13 @@ export class Logger {
   }
   
   private initializeExcelHeaders(worksheet: ExcelJS.Worksheet): void {
-    worksheet.columns = [
-      { header: 'Student ID', key: 'student_id', width: 20 },
-      { header: 'Day', key: 'day', width: 10 },
-      { header: 'Exercise ID', key: 'exercise_id', width: 12 },
-      { header: 'Exercise Name', key: 'exercise_name', width: 30 },
-      { header: 'Passed', key: 'passed', width: 10 },
-      { header: 'Error', key: 'error', width: 50 },
-      { header: 'Timestamp', key: 'timestamp', width: 25 }
-    ];
-    
-    // Style headers
-    const headerRow = worksheet.getRow(1);
-    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    headerRow.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FF0070C0' }
-    };
+    // This method is no longer used - kept for compatibility
   }
   
   async writeExcel(entry: LogEntry): Promise<void> {
     const excelPath = process.env.RESULTS_FILE || './results.xlsx';
     
     let workbook: ExcelJS.Workbook;
-    let worksheet: ExcelJS.Worksheet;
     
     // Load existing workbook or create new one
     const fileExists = await fs.pathExists(excelPath);
@@ -126,85 +138,133 @@ export class Logger {
       try {
         workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(excelPath);
-        worksheet = workbook.getWorksheet('Results') || workbook.addWorksheet('Results');
       } catch (err) {
         // File is corrupted or invalid, create new workbook
         workbook = new ExcelJS.Workbook();
-        worksheet = workbook.addWorksheet('Results');
-        this.initializeExcelHeaders(worksheet);
       }
     } else {
       workbook = new ExcelJS.Workbook();
-      worksheet = workbook.addWorksheet('Results');
-      this.initializeExcelHeaders(worksheet);
     }
     
-    const studentId = path.basename(entry.repoPath);
+    // Get or create worksheet for this day
+    const dayName = entry.day;
+    let worksheet = workbook.getWorksheet(dayName);
     
-    // Get existing rows to check for duplicates
-    const existingRows = new Set<string>();
+    if (!worksheet) {
+      worksheet = workbook.addWorksheet(dayName);
+      
+      // Initialize headers: Student ID | Score | Ex00 | Ex01 | Ex02 | ...
+      const headers = ['Student ID', 'Score'];
+      
+      // Add exercise columns based on the results
+      const exerciseIds = entry.results.map(r => `Ex${r.id}`);
+      headers.push(...exerciseIds);
+      
+      worksheet.columns = headers.map((h, idx) => ({
+        header: h,
+        key: idx === 0 ? 'student_id' : idx === 1 ? 'score' : `ex${entry.results[idx - 2]?.id}`,
+        width: idx === 0 ? 20 : idx === 1 ? 20 : 15
+      }));
+      
+      // Style header row
+      const headerRow = worksheet.getRow(1);
+      headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF0070C0' }
+      };
+      headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
+    } else {
+      // Worksheet exists - re-establish column keys for addRow to work correctly
+      const headers = ['Student ID', 'Score'];
+      const exerciseIds = entry.results.map(r => `Ex${r.id}`);
+      headers.push(...exerciseIds);
+      
+      worksheet.columns = headers.map((h, idx) => ({
+        header: h,
+        key: idx === 0 ? 'student_id' : idx === 1 ? 'score' : `ex${entry.results[idx - 2]?.id}`,
+        width: idx === 0 ? 20 : idx === 1 ? 20 : 15
+      }));
+    }
+    
+    const studentId = process.env.STUDENT_NAME || path.basename(entry.repoPath);
+    
+    // Find existing row for this student or create new one
+    let studentRow: ExcelJS.Row | null = null;
+    let studentRowNumber = 0;
+    
     worksheet.eachRow((row, rowNumber) => {
       if (rowNumber > 1) { // Skip header
-        const key = `${row.getCell(1).value}_${row.getCell(2).value}_${row.getCell(3).value}`;
-        existingRows.add(key);
+        const cellValue = row.getCell(1).value;
+        if (cellValue === studentId) {
+          studentRow = row;
+          studentRowNumber = rowNumber;
+        }
       }
     });
     
-    // Add or update rows for each exercise result
-    for (const result of entry.results) {
-      const key = `${studentId}_${entry.day}_${result.id}`;
-      
-      // Check if this combination already exists
-      let existingRowNumber: number | null = null;
-      worksheet.eachRow((row, rowNumber) => {
-        if (rowNumber > 1) {
-          const rowKey = `${row.getCell(1).value}_${row.getCell(2).value}_${row.getCell(3).value}`;
-          if (rowKey === key) {
-            existingRowNumber = rowNumber;
-          }
-        }
-      });
-      
-      const rowData = {
+    if (!studentRow) {
+      // Add new row
+      const rowData: any = { 
         student_id: studentId,
-        day: entry.day,
-        exercise_id: result.id,
-        exercise_name: result.name,
-        passed: result.passed ? 'YES' : 'NO',
-        error: result.error || '',
-        timestamp: entry.timestamp
+        score: `${entry.passedExercises}/${entry.totalExercises} passed (${entry.percentage}%)`
       };
       
-      if (existingRowNumber) {
-        // Update existing row
-        const existingRow = worksheet.getRow(existingRowNumber);
-        existingRow.getCell('student_id').value = rowData.student_id;
-        existingRow.getCell('day').value = rowData.day;
-        existingRow.getCell('exercise_id').value = rowData.exercise_id;
-        existingRow.getCell('exercise_name').value = rowData.exercise_name;
-        existingRow.getCell('passed').value = rowData.passed;
-        existingRow.getCell('error').value = rowData.error;
-        existingRow.getCell('timestamp').value = rowData.timestamp;
-      } else {
-        // Add new row
-        const newRow = worksheet.addRow(rowData);
-        
-        // Color code based on pass/fail
-        if (result.passed) {
-          newRow.getCell('passed').fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FF92D050' } // Green
-          };
-        } else {
-          newRow.getCell('passed').fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFFF6B6B' } // Red
-          };
-        }
-      }
+      entry.results.forEach((result, idx) => {
+        const key = `ex${result.id}`;
+        rowData[key] = this.formatErrorMessage(result);
+      });
+      
+      studentRow = worksheet.addRow(rowData);
+      studentRowNumber = studentRow.number;
+    } else {
+      // Update existing row - score column
+      const scoreCell = worksheet.getRow(studentRowNumber).getCell(2);
+      scoreCell.value = `${entry.passedExercises}/${entry.totalExercises} passed (${entry.percentage}%)`;
+      
+      entry.results.forEach((result, idx) => {
+        const colNumber = idx + 3; // +1 for 1-based, +1 for student_id, +1 for score
+        const cell = worksheet.getRow(studentRowNumber).getCell(colNumber);
+        cell.value = this.formatErrorMessage(result);
+      });
     }
+    
+    // Style the Student ID cell (no background color)
+    const studentIdCell = worksheet.getRow(studentRowNumber).getCell(1);
+    studentIdCell.alignment = { horizontal: 'left', vertical: 'middle' };
+    
+    // Style the Score cell
+    const scoreCell = worksheet.getRow(studentRowNumber).getCell(2);
+    scoreCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    scoreCell.font = { bold: true };
+    
+    // Color code the exercise cells (starting from column 3)
+    entry.results.forEach((result, idx) => {
+      const colNumber = idx + 3; // +1 for 1-based, +1 for student_id, +1 for score
+      const cell = worksheet.getRow(studentRowNumber).getCell(colNumber);
+      const cellValue = cell.value?.toString() || '';
+      
+      // Color based on actual cell value, not just result.passed
+      // because cell might contain previous value when updating
+      if (cellValue === 'OK') {
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF92D050' } // Green
+        };
+        cell.font = { bold: true, color: { argb: 'FF006100' } };
+      } else if (cellValue && cellValue !== '') {
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFFF6B6B' } // Red
+        };
+        cell.font = { color: { argb: 'FF8B0000' } };
+      }
+      
+      cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+    });
     
     // Save workbook
     await workbook.xlsx.writeFile(excelPath);

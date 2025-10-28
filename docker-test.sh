@@ -141,6 +141,7 @@ run_checker_in_docker() {
     "-e" "EXERCISE_CONFIG=/config.json"
     "-e" "LOG_DIR=/logs"
     "-e" "RESULTS_FILE=/results.xlsx"
+    "-e" "STUDENT_NAME=$student_name"
   )
   
   if [ -n "$exercise_id" ]; then
