@@ -1,0 +1,156 @@
+{
+  "day": "day01",
+  "baseDir": "IDV-VUJS/day01/hello-typescript",
+  "setupExercise": {
+    "id": "00",
+    "name": "setup",
+    "files": [
+      "helloTypeScript.ts"
+    ],
+    "expectedOutput": "Hello TypeScript!",
+    "runCommand": "npx ts-node helloTypeScript.ts"
+  },
+  "exercises": [
+    {
+      "id": "01",
+      "name": "string",
+      "file": "welcomeMessage.ts",
+      "expectedOutput": "Welcome to Code2Work!",
+      "description": "Variable welcomeMessage de type string"
+    },
+    {
+      "id": "02",
+      "name": "number",
+      "file": "number.ts",
+      "expectedOutput": "2004",
+      "description": "Variable etnaCreationYear de type number"
+    },
+    {
+      "id": "03",
+      "name": "boolean",
+      "file": "boolean.ts",
+      "expectedOutput": "true",
+      "description": "Variable likesCoffee de type boolean"
+    },
+    {
+      "id": "04",
+      "name": "number array",
+      "file": "numberArray.ts",
+      "expectedOutput": "[ 15, 18, 23, 19, 76 ]\n15",
+      "description": "Tableau studentScores et affichage du premier élément"
+    },
+    {
+      "id": "05",
+      "name": "string array",
+      "file": "stringArray.ts",
+      "expectedOutput": "Blog\n3",
+      "description": "Tableau projectNames, dernier élément et longueur"
+    },
+    {
+      "id": "06",
+      "name": "sayHi function",
+      "file": "sayHi.ts",
+      "expectedOutput": "Hi, Alice!",
+      "description": "Fonction sayHi(firstname: string): void"
+    },
+    {
+      "id": "07",
+      "name": "addTwoNumbers function",
+      "file": "addTwoNumbers.ts",
+      "expectedOutput": "81",
+      "description": "Fonction addTwoNumbers(a: number, b: number): void"
+    },
+    {
+      "id": "08",
+      "name": "calculateAverage function",
+      "file": "calculateAverage.ts",
+      "expectedOutput": "14,17",
+      "description": "Fonction calculateAverage avec arrondi à 2 décimales"
+    },
+    {
+      "id": "09",
+      "name": "calculateLength function",
+      "file": "calculateLength.ts",
+      "expectedOutput": "23",
+      "description": "Fonction calculateLength(text: string): number"
+    },
+    {
+      "id": "10",
+      "name": "object",
+      "file": "object.ts",
+      "expectedOutput": "{ firstname: 'Antoine', lastname: 'Dupont', age: 28, city: 'Toulouse' }\nAntoine\nDupont\n28\nToulouse",
+      "description": "Objet person avec 4 propriétés"
+    },
+    {
+      "id": "11",
+      "name": "interface",
+      "file": "interface.ts",
+      "expectedOutput": "{\n  name: 'Pikachu',\n  types: [ 'Electric' ],\n  level: 25,\n  hp: 35,\n  isLegendary: false\n}\nPikachu\n[ 'Electric' ]\n25\n35\nfalse",
+      "description": "Interface Pokemon et objet pokemon"
+    },
+    {
+      "id": "12",
+      "name": "displayFullName function",
+      "file": "displayFullName.ts",
+      "expectedOutput": "{\n  firstname: 'Marie',\n  lastname: 'Curie',\n  age: 157,\n  email: 'marie.curie@etna.io',\n  isActive: false\n}\nMarie Curie",
+      "description": "Interface User et fonction displayFullName"
+    },
+    {
+      "id": "13",
+      "name": "union",
+      "file": "union.ts",
+      "expectedOutput": "Hello everyone!\n-42",
+      "description": "Variable unionValue : string | number"
+    },
+    {
+      "id": "14",
+      "name": "isEven function",
+      "file": "isEven.ts",
+      "expectedOutput": "false",
+      "description": "Fonction isEven(n: number): boolean"
+    },
+    {
+      "id": "15",
+      "name": "convertMinutesInHours function",
+      "file": "convertMinutesInHours.ts",
+      "expectedOutput": "27 hours 23 minutes",
+      "description": "Fonction convertMinutesInHours"
+    },
+    {
+      "id": "16",
+      "name": "any",
+      "file": "any.ts",
+      "expectedOutput": "8374\nETNA is the best school ever!\ntrue\n{ key: 'value' }\n[ 4324, 'This is a string', false, [ 1, 2, 3 ] ]",
+      "description": "Variable anyValue: any avec plusieurs types"
+    },
+    {
+      "id": "17",
+      "name": "const / let",
+      "file": "constAndLet.ts",
+      "expectedOutput": "compile_error",
+      "errorPattern": "Cannot assign to 'schoolName' because it is a constant",
+      "description": "Test de modification de const (doit produire une erreur)"
+    },
+    {
+      "id": "18",
+      "name": "enum",
+      "file": "enum.ts",
+      "expectedOutput": "wednesday",
+      "description": "Enum DaysOfWeek et affichage de WEDNESDAY"
+    },
+    {
+      "id": "19",
+      "name": "dailyMessage",
+      "file": "dailyMessage.ts",
+      "expectedOutput": "Have a chill sunday!",
+      "description": "Fonction dailyMessage(day: DaysOfWeek): string | null"
+    },
+    {
+      "id": "20",
+      "name": "displayAverageForStudent function",
+      "file": "displayAverageForStudent.ts",
+      "expectedOutput": "Antoine a une moyenne de 7.2\nC'est insuffisant...",
+      "description": "Interface Student et fonction displayAverageForStudent"
+    }
+  ]
+}

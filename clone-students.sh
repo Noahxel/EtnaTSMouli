@@ -1,11 +1,11 @@
 #!/bin/bash
 # -*- coding: utf-8 -*-
 #
-# Script pour cloner automatiquement tous les jours (1 à 5 par défaut)
-# Usage: bash clone_tous_les_jours.sh [jour_debut] [jour_fin]
-# Exemple: bash clone_tous_les_jours.sh 1 5
+# Script to automatically clone all student repositories by day
+# Usage: ./clone-students.sh [start_day] [end_day]
+# Example: ./clone-students.sh 1 5
 
-set -e  # Arrêter en cas d'erreur
+set -e  # Stop on error
 
 # Couleurs pour l'affichage
 RED='\033[0;31m'
@@ -19,38 +19,38 @@ JOUR_DEBUT=${1:-1}
 JOUR_FIN=${2:-5}
 
 echo "============================================================"
-echo "📚 CLONAGE AUTOMATIQUE DES REPOS - JOURS $JOUR_DEBUT à $JOUR_FIN"
+echo "📚 CLONING STUDENT REPOS - DAYS $JOUR_DEBUT to $JOUR_FIN"
 echo "============================================================"
 echo
 
 # Vérifier que Python est installé
 if ! command -v python3 &> /dev/null; then
-    echo -e "${RED}❌ Python 3 n'est pas installé${NC}"
+    echo -e "${RED}❌ Python 3 is not installed${NC}"
     exit 1
 fi
 
 # Vérifier que le script principal existe
-if [ ! -f "clone_repos_etna.py" ]; then
-    echo -e "${RED}❌ Fichier clone_repos_etna.py introuvable${NC}"
-    echo -e "${YELLOW}⚠️  Assurez-vous d'exécuter ce script depuis le bon répertoire${NC}"
+if [ ! -f "scripts/clone_repos_etna.py" ]; then
+    echo -e "${RED}❌ File scripts/clone_repos_etna.py not found${NC}"
+    echo -e "${YELLOW}⚠️  Make sure to run this script from the project root directory${NC}"
     exit 1
 fi
 
 # Vérifier que config_etna.py existe
 if [ ! -f "config_etna.py" ]; then
-    echo -e "${RED}❌ Fichier config_etna.py introuvable${NC}"
-    echo -e "${YELLOW}⚠️  Copiez config_etna.example.py vers config_etna.py et configurez-le${NC}"
+    echo -e "${RED}❌ File config_etna.py not found${NC}"
+    echo -e "${YELLOW}⚠️  Copy scripts/config_etna.example.py to config_etna.py and configure it${NC}"
     exit 1
 fi
 
 # Vérifier que les dépendances sont installées
-echo "🔍 Vérification des dépendances..."
+echo "🔍 Checking dependencies..."
 if ! python3 -c "import requests" 2>/dev/null; then
-    echo -e "${YELLOW}⚠️  Module 'requests' non installé${NC}"
-    echo "📦 Installation de requests..."
+    echo -e "${YELLOW}⚠️  Module 'requests' not installed${NC}"
+    echo "📦 Installing requests..."
     pip3 install requests
 fi
-echo -e "${GREEN}✅ Dépendances OK${NC}"
+echo -e "${GREEN}✅ Dependencies OK${NC}"
 echo
 
 # Variables pour les statistiques
@@ -64,23 +64,23 @@ for jour in $(seq $JOUR_DEBUT $JOUR_FIN); do
 
     echo
     echo "============================================================"
-    echo -e "${BLUE}📅 JOUR $jour${NC}"
+    echo -e "${BLUE}📅 DAY $jour${NC}"
     echo "============================================================"
     echo
 
     # Exécuter le script de clonage
-    if python3 clone_repos_etna.py $jour; then
+    if python3 scripts/clone_repos_etna.py $jour; then
         SUCCES_JOURS=$((SUCCES_JOURS + 1))
-        echo -e "${GREEN}✅ Jour $jour terminé avec succès${NC}"
+        echo -e "${GREEN}✅ Day $jour completed successfully${NC}"
     else
         ECHEC_JOURS=$((ECHEC_JOURS + 1))
-        echo -e "${RED}❌ Jour $jour terminé avec des erreurs${NC}"
+        echo -e "${RED}❌ Day $jour completed with errors${NC}"
     fi
 
     # Petite pause entre chaque jour pour éviter de surcharger l'API
     if [ $jour -lt $JOUR_FIN ]; then
         echo
-        echo "⏳ Pause de 2 secondes..."
+        echo "⏳ Pause 2 seconds..."
         sleep 2
     fi
 done
@@ -88,13 +88,13 @@ done
 # Afficher le résumé final
 echo
 echo "============================================================"
-echo "📊 RÉSUMÉ FINAL"
+echo "📊 FINAL SUMMARY"
 echo "============================================================"
-echo -e "Total de jours traités: ${BLUE}$TOTAL_JOURS${NC}"
-echo -e "Succès: ${GREEN}$SUCCES_JOURS${NC}"
+echo -e "Total days processed: ${BLUE}$TOTAL_JOURS${NC}"
+echo -e "Success: ${GREEN}$SUCCES_JOURS${NC}"
 
 if [ $ECHEC_JOURS -gt 0 ]; then
-    echo -e "Échecs: ${RED}$ECHEC_JOURS${NC}"
+    echo -e "Failures: ${RED}$ECHEC_JOURS${NC}"
 fi
 
 echo
@@ -102,11 +102,11 @@ echo "============================================================"
 
 # Code de sortie
 if [ $ECHEC_JOURS -eq 0 ]; then
-    echo -e "${GREEN}✅ TOUS LES JOURS ONT ÉTÉ CLONÉS AVEC SUCCÈS${NC}"
+    echo -e "${GREEN}✅ ALL DAYS CLONED SUCCESSFULLY${NC}"
     echo "============================================================"
     exit 0
 else
-    echo -e "${YELLOW}⚠️  CERTAINS JOURS ONT DES ERREURS${NC}"
+    echo -e "${YELLOW}⚠️  SOME DAYS HAD ERRORS${NC}"
     echo "============================================================"
     exit 1
 fi

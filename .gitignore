@@ -137,3 +137,16 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+logs/
+# Student repositories (cloned from GitLab)
+test-repos/*/repos/
+
+# GitLab configuration (contains sensitive token)
+config_etna.py
+
+# Environment files
+env
+.env
+__pycache__/
+results.xlsx

@@ -1,0 +1,254 @@
+IDV-VUJS / Code2Work - Semaine 04 / Jour 01
+
+Modalités
+Type	Description
+Dépôt	$$RENDU$$
+Dossier	IDV-VUJS/day01/
+VM	$$VM$$
+Correction	Validation manuelle
+Durée	2 jours
+Effectif	Seul
+Environnement	Debian
+
+Exercice 00 - setup
+Nom et chemin : IDV-VUJS/day01/setup
+Instructions :
+- Installez Node.js et npm.
+- Initialisez un projet hello-typescript.
+- Installez typescript globalement et localement.
+- Générez tsconfig.json.
+- Créez .gitignore pour node_modules/ et *.js.
+- Créez helloTypeScript.ts et affichez "Hello TypeScript!".
+- Compilez et exécutez.
+Exemple attendu : Hello TypeScript!
+Fichiers attendus : .gitignore, package.json, package-lock.json, tsconfig.json, helloTypeScript.ts
+Ressources :
+- https://www.w3schools.com/typescript/typescript_getstarted.php
+- https://www.w3schools.com/whatis/whatis_npm.asp
+
+Exercice 01 - string
+Nom et chemin : IDV-VUJS/day01/welcomeMessage.ts
+Instructions :
+- Créez une variable welcomeMessage de type string avec "Welcome to Code2Work!".
+- Affichez-la.
+Exemple attendu : Welcome to Code2Work!
+Ressources :
+- https://www.tutorialsteacher.com/typescript/typescript-string
+- https://developer.mozilla.org/en-US/docs/Web/API/console/log_static
+
+Exercice 02 - number
+Nom et chemin : IDV-VUJS/day01/number.ts
+Instructions :
+- Créez une variable etnaCreationYear de type number = 2004.
+- Affichez-la.
+Exemple attendu : 2004
+Ressources :
+- https://www.tutorialsteacher.com/typescript/typescript-number
+
+Exercice 03 - boolean
+Nom et chemin : IDV-VUJS/day01/boolean.ts
+Instructions :
+- Créez une variable likesCoffee de type boolean = true.
+- Affichez-la.
+Exemple attendu : true
+Ressources :
+- https://www.tutorialsteacher.com/typescript/typescript-boolean
+
+Exercice 04 - number array
+Nom et chemin : IDV-VUJS/day01/numberArray.ts
+Instructions :
+- Créez un tableau studentScores de type number[] avec [15, 18, 23, 19, 76].
+- Affichez le tableau complet puis le premier élément.
+Exemple attendu :
+[ 15, 18, 23, 19, 76 ]
+15
+Ressources :
+- https://www.tutorialsteacher.com/typescript/typescript-array
+
+Exercice 05 - string array
+Nom et chemin : IDV-VUJS/day01/stringArray.ts
+Instructions :
+- Créez un tableau projectNames de type string[] avec ["To-Do List", "Portfolio", "Blog"].
+- Affichez le dernier élément puis la longueur du tableau.
+Exemple attendu :
+Blog
+3
+
+Exercice 06 - sayHi function
+Nom et chemin : IDV-VUJS/day01/sayHi.ts
+Instructions :
+- Créez une fonction sayHi(firstname: string): void.
+- Affichez "Hi, <firstname>!".
+Exemple attendu :
+Hi, Alice!
+Ressources :
+- https://www.typescriptlang.org/docs/handbook/functions.html
+- https://www.tutorialsteacher.com/typescript/typescript-void
+
+Exercice 07 - addTwoNumbers function
+Nom et chemin : IDV-VUJS/day01/addTwoNumbers.ts
+Instructions :
+- Créez une fonction addTwoNumbers(a: number, b: number): void.
+- Affichez la somme.
+Exemple attendu :
+81
+
+Exercice 08 - calculateAverage function
+Nom et chemin : IDV-VUJS/day01/calculateAverage.ts
+Instructions :
+- Créez une fonction calculateAverage(a: number, b: number, c: number): void.
+- Calculez la moyenne et arrondissez à 2 décimales.
+Exemple attendu :
+14,17
+
+Exercice 09 - calculateLength function
+Nom et chemin : IDV-VUJS/day01/calculateLength.ts
+Instructions :
+- Créez une fonction calculateLength(text: string): number.
+- Retournez la longueur.
+Exemple attendu : 23
+
+Exercice 10 - object
+Nom et chemin : IDV-VUJS/day01/object.ts
+Instructions :
+- Créez un objet person avec firstname, lastname, age, city.
+- Affichez l'objet complet puis chaque propriété.
+Exemple attendu :
+{ firstname: 'Antoine', lastname: 'Dupont', age: 28, city: 'Toulouse' }
+Antoine
+Dupont
+28
+Toulouse
+Ressources :
+- https://www.w3schools.com/typescript/typescript_object_types.php
+
+Exercice 11 - interface
+Nom et chemin : IDV-VUJS/day01/interface.ts
+Instructions :
+- Créez une interface Pokemon.
+- Créez un objet pokemon de type Pokemon et affichez ses propriétés.
+Exemple attendu :
+{
+  name: 'Pikachu',
+  types: [ 'Electric' ],
+  level: 25,
+  hp: 35,
+  isLegendary: false
+}
+Pikachu
+[ 'Electric' ]
+25
+35
+false
+Ressources :
+- https://www.typescriptlang.org/docs/handbook/interfaces.html
+
+Exercice 12 - displayFullName function
+Nom et chemin : IDV-VUJS/day01/displayFullName.ts
+Instructions :
+- Créez une interface User.
+- Créez un objet user et une fonction displayFullName(User): void.
+- Affichez prénom et nom.
+Exemple attendu :
+{
+  firstname: 'Marie',
+  lastname: 'Curie',
+  age: 157,
+  email: 'marie.curie@etna.io',
+  isActive: false
+}
+Marie Curie
+Ressources :
+- https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html
+
+Exercice 13 - union
+Nom et chemin : IDV-VUJS/day01/union.ts
+Instructions :
+- Créez une variable unionValue : string | number.
+- Assignez "Hello everyone!" puis -42.
+- Affichez à chaque fois.
+Exemple attendu :
+Hello everyone!
+-42
+Ressources :
+- https://www.w3schools.com/typescript/typescript_union_types.php
+- https://stackoverflow.com/questions/61370779/typescript-understanding-union-and-intersection-types
+
+Exercice 14 - isEven function
+Nom et chemin : IDV-VUJS/day01/isEven.ts
+Instructions :
+- Créez une fonction isEven(n: number): boolean.
+- Retournez true si pair, false sinon.
+Exemple attendu : false
+Ressources :
+- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Remainder
+
+Exercice 15 - convertMinutesInHours function
+Nom et chemin : IDV-VUJS/day01/convertMinutesInHours.ts
+Instructions :
+- Créez une fonction convertMinutesInHours(minutes: number): void.
+- Affichez les heures et minutes correspondantes.
+Exemple attendu :
+27 hours 23 minutes
+
+Exercice 16 - any
+Nom et chemin : IDV-VUJS/day01/any.ts
+Instructions :
+- Créez une variable anyValue: any.
+- Assignez plusieurs types différents et affichez après chaque assignation.
+Exemple attendu :
+8374
+ETNA is the best school ever!
+true
+{ key: 'value' }
+[ 4324, 'This is a string', false, [ 1, 2, 3 ] ]
+Ressources :
+- https://www.totaltypescript.com/concepts/any-type
+
+Exercice 17 - const / let
+Nom et chemin : IDV-VUJS/day01/constAndLet.ts
+Instructions :
+- Créez une constante schoolName = "ETNA".
+- Créez une variable schoolAge = 21, incrémentez-la.
+- Tentez de modifier schoolName → erreur attendue.
+Exemple d’erreur :
+error TS2588: Cannot assign to 'schoolName' because it is a constant.
+Ressources :
+- https://www.tutorialsteacher.com/typescript/typescript-variable
+- https://www.reddit.com/r/typescript/comments/8elg3s/var_const_let/
+- https://medium.com/@robinviktorsson/understanding-the-differences-between-var-let-and-const-in-javascript-and-typescript-0ddd90c0b672
+
+Exercice 18 - enum
+Nom et chemin : IDV-VUJS/day01/enum.ts
+Instructions :
+- Créez un enum DaysOfWeek { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY }.
+- Affichez WEDNESDAY.
+Exemple attendu :
+wednesday
+Ressources :
+- https://www.w3schools.com/typescript/typescript_enums.php
+
+Exercice 19 - dailyMessage
+Nom et chemin : IDV-VUJS/day01/dailyMessage.ts
+Instructions :
+- Réutilisez DaysOfWeek.
+- Créez une fonction dailyMessage(day: DaysOfWeek): string | null.
+- Retournez un message selon le jour (Monday, Friday, Sunday ou null).
+Exemple attendu :
+Have a chill sunday!
+Ressources :
+- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/switch
+- https://medium.com/norsys-octogone/opérateurs-de-gestion-des-valeurs-nulles-en-javascript-typescript-a6aeaa1ed47e
+
+Exercice 20 - displayAverageForStudent function
+Nom et chemin : IDV-VUJS/day01/displayAverageForStudent.ts
+Instructions :
+- Créez une interface Student (firstname, lastname).
+- Créez un objet student.
+- Créez une fonction displayAverageForStudent(student: Student, grades: number[]): void.
+- Calculez la moyenne et affichez messages selon les intervalles.
+Exemple attendu :
+Antoine a une moyenne de 7.2
+C'est insuffisant...
+Ressources :
+- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce

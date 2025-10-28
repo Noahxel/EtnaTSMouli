@@ -1,0 +1,62 @@
+# Example GitLab CI configuration for automatic exercise checking
+# Place this in student repositories or use as a template
+
+stages:
+  - validate
+
+# Check exercises when students push their code
+check-day01-exercises:
+  stage: validate
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    CHECKER_IMAGE: "registry.gitlab.com/your-group/node-ts-checker:latest"
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - |
+      docker run --rm \
+        -v $CI_PROJECT_DIR:/repo \
+        -e REPO_DIR=/repo \
+        -e EXERCISE_CONFIG=/usr/src/app/exercises/day01-exercises.json \
+        $CHECKER_IMAGE
+  only:
+    - main
+    - develop
+  allow_failure: false
+  artifacts:
+    when: always
+    reports:
+      junit: test-results.xml  # Future: generate JUnit XML reports
+
+# Alternative: Run locally without Docker (if GitLab runner has Node)
+check-day01-local:
+  stage: validate
+  image: node:20-alpine
+  before_script:
+    - npm install -g typescript ts-node
+    - npm install
+  script:
+    - npx ts-node check-exercises.ts
+  only:
+    - main
+
+# For multiple days
+check-all-days:
+  stage: validate
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - |
+      for day_config in /usr/src/app/exercises/day*.json; do
+        echo "Checking $(basename $day_config)"
+        docker run --rm \
+          -v $CI_PROJECT_DIR:/repo \
+          -e REPO_DIR=/repo \
+          -e EXERCISE_CONFIG=$day_config \
+          $CHECKER_IMAGE
+      done
+  only:
+    - main

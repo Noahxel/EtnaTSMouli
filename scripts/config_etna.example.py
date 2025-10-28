@@ -24,7 +24,7 @@ GITLAB_URL = "https://rendu-git.etna-alternance.net"
 
 # Votre token d'accès GitLab
 # IMPORTANT: Gardez ce token secret!
-GITLAB_TOKEN = "glpat-mi5xlNVO76AlzVlCbPGvv286MQp1OjJmdQk.01.0z0h1n3dc"
+GITLAB_TOKEN = "your-gitlab-token-here"
 
 # ID du groupe principal contenant tous les sous-groupes de jours
 # Exemple: Pour "2025_C2WK - Octobre_IDV-VUJS_1_0"
@@ -32,5 +32,5 @@ GITLAB_TOKEN = "glpat-mi5xlNVO76AlzVlCbPGvv286MQp1OjJmdQk.01.0z0h1n3dc"
 MAIN_GROUP_ID = 12345678
 
 # Répertoire de destination pour les repos clonés
-# Les repos seront organisés comme: BASE_DIR/jour001/nom_eleve/repo/
-BASE_DIR = "./repos_eleves"
+# Les repos seront organisés comme: BASE_DIR/day01/repos/student_name/
+BASE_DIR = "./test-repos"

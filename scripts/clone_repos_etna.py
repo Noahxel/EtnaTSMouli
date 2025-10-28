@@ -13,6 +13,9 @@ import re
 import requests
 from urllib.parse import quote
 
+# Add parent directory to path to import config from root
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 # Importer la configuration
 try:
     import config_etna as config
@@ -201,13 +204,13 @@ def clone_ou_pull_repo(project, dest_dir, numero_jour):
     """
     nom_eleve = extraire_nom_eleve(project['name'])
 
-    # Créer le chemin: repos_eleves/jour001/nom_eleve/nom_repo/
-    jour_dir = os.path.join(dest_dir, f"jour{numero_jour}")
-    eleve_dir = os.path.join(jour_dir, nom_eleve)
-    repo_dir = os.path.join(eleve_dir, project['path'])
+    # Créer le chemin: test-repos/day01/repos/student_name/
+    jour_formatted = f"day{int(numero_jour):02d}"  # day01, day02, etc.
+    jour_dir = os.path.join(dest_dir, jour_formatted, "repos")
+    repo_dir = os.path.join(jour_dir, nom_eleve)
 
     # Créer les dossiers parents si nécessaire
-    os.makedirs(eleve_dir, exist_ok=True)
+    os.makedirs(jour_dir, exist_ok=True)
 
     # Construire l'URL avec le token pour l'authentification
     http_url = project['http_url_to_repo']
@@ -217,7 +220,7 @@ def clone_ou_pull_repo(project, dest_dir, numero_jour):
     try:
         if os.path.exists(repo_dir):
             # Le repo existe déjà, faire un pull
-            print(f"  📥 Mise à jour: {nom_eleve}/{project['path']}")
+            print(f"  📥 Update: {nom_eleve}")
             result = subprocess.run(
                 ['git', '-C', repo_dir, 'pull'],
                 capture_output=True,
@@ -227,16 +230,16 @@ def clone_ou_pull_repo(project, dest_dir, numero_jour):
 
             if result.returncode == 0:
                 if 'Already up to date' in result.stdout:
-                    print(f"  ✅ Déjà à jour")
+                    print(f"  ✅ Already up to date")
                 else:
-                    print(f"  ✅ Mis à jour")
+                    print(f"  ✅ Updated")
                 return True
             else:
-                print(f"  ❌ Erreur lors du pull: {result.stderr}")
+                print(f"  ❌ Error during pull: {result.stderr}")
                 return False
         else:
             # Cloner le repo
-            print(f"  📚 Clone: {nom_eleve}/{project['path']}")
+            print(f"  📚 Clone: {nom_eleve}")
             result = subprocess.run(
                 ['git', 'clone', authenticated_url, repo_dir],
                 capture_output=True,
@@ -245,17 +248,17 @@ def clone_ou_pull_repo(project, dest_dir, numero_jour):
             )
 
             if result.returncode == 0:
-                print(f"  ✅ Cloné avec succès")
+                print(f"  ✅ Cloned successfully")
                 return True
             else:
-                print(f"  ❌ Erreur lors du clone: {result.stderr}")
+                print(f"  ❌ Error during clone: {result.stderr}")
                 return False
 
     except subprocess.TimeoutExpired:
-        print(f"  ⚠️  Timeout lors de l'opération Git")
+        print(f"  ⚠️  Git operation timeout")
         return False
     except Exception as e:
-        print(f"  ❌ Erreur: {e}")
+        print(f"  ❌ Error: {e}")
         return False
 
 
