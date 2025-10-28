@@ -13,6 +13,7 @@ EXERCISE_ID=""
 CHECK_ALL_STUDENTS=false
 REBUILD_IMAGE=false
 IMAGE_NAME="mouli-ts-checker:latest"
+PARALLEL_JOBS=16  # Number of parallel Docker containers
 
 # Colors
 RED='\033[0;31m'
@@ -32,7 +33,7 @@ usage() {
   echo "  -d, --day <day>       Day to check (e.g., day01, day02) [default: day01]"
   echo "  -s, --student <name>  Check specific student in test-repos/dayXX/repos/"
   echo "  -e, --exercise <id>   Check only specific exercise ID (e.g., 05)"
-  echo "  -a, --all             Check all students in specified day"
+  echo "  -a, --all             Check all students in specified day (sequential)"
   echo "  -b, --rebuild         Force rebuild Docker image before running"
   echo "  -h, --help            Show this help"
   echo ""
@@ -157,7 +158,7 @@ run_checker_in_docker() {
 
 # All students mode
 if [ "$CHECK_ALL_STUDENTS" = true ]; then
-  echo -e "${GREEN}📚 Checking all students in ${DAY}...${NC}"
+  echo -e "${GREEN}📚 Checking all students in ${DAY} (sequential mode)...${NC}"
   echo ""
   
   REPOS_DIR="./test-repos/${DAY}/repos"
@@ -181,23 +182,24 @@ if [ "$CHECK_ALL_STUDENTS" = true ]; then
   SUCCESS=0
   FAILED=0
   
+  # Sequential execution only - no parallel to ensure Excel consistency
   for STUDENT_DIR in $STUDENT_DIRS; do
     STUDENT=$(basename "$STUDENT_DIR")
     TOTAL=$((TOTAL + 1))
     
     echo ""
     echo -e "${BLUE}======================================${NC}"
-    echo -e "${BLUE}🐳 Container for: $STUDENT${NC}"
+    echo -e "${BLUE}🐳 [$TOTAL] Testing: $STUDENT${NC}"
     echo -e "${BLUE}======================================${NC}"
-    
-    if run_checker_in_docker "$STUDENT_DIR" "$STUDENT" "$EXERCISE_ID"; then
-      SUCCESS=$((SUCCESS + 1))
-      echo -e "${GREEN}✅ $STUDENT completed${NC}"
-    else
-      FAILED=$((FAILED + 1))
-      echo -e "${RED}❌ $STUDENT failed${NC}"
-    fi
-  done
+      
+      if run_checker_in_docker "$STUDENT_DIR" "$STUDENT" "$EXERCISE_ID"; then
+        SUCCESS=$((SUCCESS + 1))
+        echo -e "${GREEN}✅ $STUDENT completed${NC}"
+      else
+        FAILED=$((FAILED + 1))
+        echo -e "${RED}❌ $STUDENT failed${NC}"
+      fi
+    done
   
   echo ""
   echo -e "${BLUE}======================================${NC}"

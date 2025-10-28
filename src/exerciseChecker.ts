@@ -41,7 +41,14 @@ export interface ExerciseResult {
   errorDetails?: string; // More detailed error information
 }
 
-const log = (...args: any[]) => console.log('[exercise-checker]', ...args);
+// Verbose logging - set to false to reduce output
+const VERBOSE = process.env.VERBOSE === 'true';
+const log = (...args: any[]) => {
+  if (VERBOSE) {
+    console.log('[exercise-checker]', ...args);
+  }
+};
+const logAlways = (...args: any[]) => console.log('[exercise-checker]', ...args);
 
 function normalizeOutput(output: string): string {
   return output.trim().replace(/\r\n/g, '\n');
@@ -230,17 +237,19 @@ export async function checkExercise(
   exercise: Exercise,
   projectRoot: string
 ): Promise<ExerciseResult> {
-  log(`\n📋 Checking Exercise ${exercise.id}: ${exercise.name}`);
-  
-  // Try to find the file in multiple possible locations
-  const filePath = await findExerciseFile(repoDir, baseDir, exercise.file);
-  
-  if (!filePath) {
-    log(`❌ File not found: ${exercise.file} (searched in multiple locations)`);
-    return {
-      id: exercise.id,
-      name: exercise.name,
-      passed: false,
+  // Wrap entire function in try-catch to prevent crashes
+  try {
+    log(`\n📋 Checking Exercise ${exercise.id}: ${exercise.name}`);
+    
+    // Try to find the file in multiple possible locations
+    const filePath = await findExerciseFile(repoDir, baseDir, exercise.file);
+    
+    if (!filePath) {
+      log(`❌ File not found: ${exercise.file} (searched in multiple locations)`);
+      return {
+        id: exercise.id,
+        name: exercise.name,
+        passed: false,
       fileExists: false,
       outputMatch: false,
       error: `File not found: ${exercise.file}`
@@ -308,8 +317,25 @@ export async function checkExercise(
       const tsNodePath = path.join(projectRoot, 'node_modules', '.bin', 'ts-node');
       const fileDir = path.dirname(filePath);
       
-      // Read the original file
-      const originalCode = await fs.readFile(filePath, 'utf8');
+      let originalCode: string;
+      let tempFilePath: string;
+      let tempTsConfig: string;
+      let needsCleanup = false;
+      
+      try {
+        // Read the original file
+        originalCode = await fs.readFile(filePath, 'utf8');
+      } catch (readError: any) {
+        log('❌ Failed to read file:', readError.message);
+        return {
+          id: exercise.id,
+          name: exercise.name,
+          passed: false,
+          fileExists: true,
+          outputMatch: false,
+          error: `Failed to read file: ${readError.message}`
+        };
+      }
       
       // Generate test input based on type
       let testInputCode: string;
@@ -326,21 +352,47 @@ export async function checkExercise(
       const modifiedCode = originalCode + `\n\n// Auto-generated test\nconsole.log(${exercise.functionName}(${testInputCode}));\n`;
       
       // Write modified code to a temporary file
-      const tempFilePath = path.join(fileDir, `__temp_${path.basename(filePath)}`);
-      await fs.writeFile(tempFilePath, modifiedCode);
+      tempFilePath = path.join(fileDir, `__temp_${path.basename(filePath)}`);
+      
+      try {
+        await fs.writeFile(tempFilePath, modifiedCode);
+      } catch (writeError: any) {
+        log('❌ Failed to write temp file:', writeError.message);
+        return {
+          id: exercise.id,
+          name: exercise.name,
+          passed: false,
+          fileExists: true,
+          outputMatch: false,
+          error: `Failed to write temp file: ${writeError.message}`
+        };
+      }
       
       // Create a temporary minimal tsconfig.json in the repo directory
-      const tempTsConfig = path.join(fileDir, 'tsconfig.json');
-      const needsCleanup = !(await fileExists(tempTsConfig));
+      tempTsConfig = path.join(fileDir, 'tsconfig.json');
+      needsCleanup = !(await fileExists(tempTsConfig));
       
       if (needsCleanup) {
-        await fs.writeJSON(tempTsConfig, {
-          compilerOptions: {
-            module: 'commonjs',
-            target: 'ES2020',
-            esModuleInterop: true
-          }
-        });
+        try {
+          await fs.writeJSON(tempTsConfig, {
+            compilerOptions: {
+              module: 'commonjs',
+              target: 'ES2020',
+              esModuleInterop: true
+            }
+          });
+        } catch (configError: any) {
+          log('❌ Failed to write tsconfig:', configError.message);
+          await fs.remove(tempFilePath).catch(() => {});
+          return {
+            id: exercise.id,
+            name: exercise.name,
+            passed: false,
+            fileExists: true,
+            outputMatch: false,
+            error: `Failed to write tsconfig: ${configError.message}`
+          };
+        }
       }
       
       try {
@@ -485,6 +537,19 @@ export async function checkExercise(
       actualOutput: err.stdout || ''
     };
   }
+  } catch (unexpectedError: any) {
+    // Catch-all for any unexpected errors to prevent crashes
+    logAlways('❌ UNEXPECTED ERROR in checkExercise:', unexpectedError.message);
+    logAlways('Stack:', unexpectedError.stack);
+    return {
+      id: exercise.id,
+      name: exercise.name,
+      passed: false,
+      fileExists: false,
+      outputMatch: false,
+      error: `Unexpected error: ${unexpectedError.message}`
+    };
+  }
 }
 
 export async function runExerciseChecks(
@@ -498,7 +563,7 @@ export async function runExerciseChecks(
   const config: ExerciseConfig = await fs.readJSON(configPath);
   const results: ExerciseResult[] = [];
   
-  log(`\n🚀 Starting checks for ${config.day}`);
+  logAlways(`\n🚀 Starting checks for ${config.day}`);
   log(`Base directory: ${config.baseDir}`);
   log(`Project root: ${projectRoot}`);
   
@@ -508,8 +573,20 @@ export async function runExerciseChecks(
   
   // Check setup exercise first (if not filtering or if filter matches)
   if (!exerciseIdFilter || exerciseIdFilter === config.setupExercise.id) {
-    const setupResult = await checkSetupExercise(repoDir, config.setupExercise, projectRoot, config.baseDir);
-    results.push(setupResult);
+    try {
+      const setupResult = await checkSetupExercise(repoDir, config.setupExercise, projectRoot, config.baseDir);
+      results.push(setupResult);
+    } catch (setupError: any) {
+      logAlways(`❌ Fatal error checking setup exercise:`, setupError.message);
+      results.push({
+        id: config.setupExercise.id,
+        name: config.setupExercise.name,
+        passed: false,
+        fileExists: false,
+        outputMatch: false,
+        error: `Fatal error: ${setupError.message}`
+      });
+    }
   }
   
   // Check all exercises (or filtered)
@@ -517,8 +594,21 @@ export async function runExerciseChecks(
     if (exerciseIdFilter && exercise.id !== exerciseIdFilter) {
       continue; // Skip if filtering and doesn't match
     }
-    const result = await checkExercise(repoDir, config.baseDir, exercise, projectRoot);
-    results.push(result);
+    try {
+      const result = await checkExercise(repoDir, config.baseDir, exercise, projectRoot);
+      results.push(result);
+    } catch (exerciseError: any) {
+      // Even if checkExercise fails catastrophically, log and continue
+      logAlways(`❌ Fatal error checking Ex${exercise.id}:`, exerciseError.message);
+      results.push({
+        id: exercise.id,
+        name: exercise.name,
+        passed: false,
+        fileExists: false,
+        outputMatch: false,
+        error: `Fatal error: ${exerciseError.message}`
+      });
+    }
   }
   
   // Summary
@@ -526,15 +616,15 @@ export async function runExerciseChecks(
   const total = results.length;
   const percentage = ((passed / total) * 100).toFixed(1);
   
-  log('\n' + '='.repeat(60));
-  log(`📊 SUMMARY: ${passed}/${total} exercises passed (${percentage}%)`);
-  log('='.repeat(60));
+  logAlways('\n' + '='.repeat(60));
+  logAlways(`📊 SUMMARY: ${passed}/${total} exercises passed (${percentage}%)`);
+  logAlways('='.repeat(60));
   
   results.forEach(r => {
     const icon = r.passed ? '✅' : '❌';
-    log(`${icon} Ex${r.id}: ${r.name}`);
+    logAlways(`${icon} Ex${r.id}: ${r.name}`);
     if (!r.passed && r.error) {
-      log(`   └─ ${r.error}`);
+      logAlways(`   └─ ${r.error}`);
     }
   });
   

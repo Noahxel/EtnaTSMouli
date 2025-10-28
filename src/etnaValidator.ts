@@ -2,7 +2,7 @@ import ExcelJS from 'exceljs';
 import fs from 'fs-extra';
 
 interface ValidationPayload {
-  validation: "denied" | "validated";
+  validation: "denied" | "valid";
   content: string;
 }
 
@@ -24,7 +24,7 @@ interface StudentValidation {
   groupId: number;
   exerciseId: string;
   exerciseName: string;
-  status: 'OK' | 'ERROR';
+  status: 'OK' | 'ERROR' | 'VALID';
   errorMessage?: string;
 }
 
@@ -85,7 +85,7 @@ export class EtnaValidator {
     console.log('   - GroupIDs are automatically read from Excel (column 24)');
   }
   
-  async readExcelErrors(day: string = 'day01', studentId?: string): Promise<StudentValidation[]> {
+  async readExcelValidations(day: string = 'day01', studentId?: string): Promise<StudentValidation[]> {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(this.excelPath);
     
@@ -147,7 +147,20 @@ export class EtnaValidator {
         const exerciseId = exerciseIdMatch[1];
         
         // Only process errors (not OK)
-        if (cellValue !== 'OK' && cellValue !== '') {
+        // Check if cell has an error or is OK
+        if (cellValue === 'OK') {
+          // Student passed the exercise
+          validations.push({
+            studentId: currentStudentId,
+            login: currentStudentId,
+            groupId: groupIdNum,
+            exerciseId: exerciseId,
+            exerciseName: exerciseHeader,
+            status: 'VALID',
+            errorMessage: 'OK'
+          });
+        } else if (cellValue !== '' && cellValue !== null) {
+          // Student failed the exercise
           validations.push({
             studentId: currentStudentId,
             login: currentStudentId,
@@ -203,36 +216,37 @@ export class EtnaValidator {
   async validateErrors(
     day: string = 'day01',
     studentId?: string,
-    dryRun: boolean = true
+    dryRun: boolean = true,
+    parallelJobs: number = 16
   ): Promise<void> {
-    console.log('📊 Reading Excel file for errors...\n');
+    console.log('📊 Reading Excel file for validations...\n');
     
-    const errors = await this.readExcelErrors(day, studentId);
+    const validations = await this.readExcelValidations(day, studentId);
     
-    if (errors.length === 0) {
-      console.log('✅ No errors found!');
+    if (validations.length === 0) {
+      console.log('✅ No validations found!');
       return;
     }
     
-    console.log(`Found ${errors.length} errors to validate:\n`);
+    console.log(`Found ${validations.length} validations to send:\n`);
     
     // Group by student
     const byStudent = new Map<string, StudentValidation[]>();
-    errors.forEach(err => {
-      if (!byStudent.has(err.studentId)) {
-        byStudent.set(err.studentId, []);
+    validations.forEach(validation => {
+      if (!byStudent.has(validation.studentId)) {
+        byStudent.set(validation.studentId, []);
       }
-      byStudent.get(err.studentId)!.push(err);
+      byStudent.get(validation.studentId)!.push(validation);
     });
     
     // Display summary
-    for (const [studentId, studentErrors] of byStudent) {
-      console.log(`${studentId}: ${studentErrors.length} errors`);
-      studentErrors.forEach(err => {
-        const shortError = err.errorMessage!.length > 50 
-          ? err.errorMessage!.substring(0, 50) + '...'
-          : err.errorMessage;
-        console.log(`  - ${err.exerciseName}: ${shortError}`);
+    for (const [studentId, studentValidations] of byStudent) {
+      console.log(`${studentId}: ${studentValidations.length} exercises`);
+      studentValidations.forEach(val => {
+        const shortMsg = val.errorMessage && val.errorMessage.length > 50 
+          ? val.errorMessage.substring(0, 50) + '...'
+          : val.errorMessage || val.status;
+        console.log(`  - ${val.exerciseName}: ${shortMsg}`);
       });
       console.log('');
     }
@@ -243,38 +257,66 @@ export class EtnaValidator {
       return;
     }
     
-    // Send validations
-    console.log('📤 Sending validations to ETNA...\n');
+    // Send validations with parallel processing
+    console.log(`📤 Sending validations to ETNA (${parallelJobs} parallel jobs)...\n`);
     
     let successCount = 0;
     let failCount = 0;
     
-    for (const error of errors) {
-      try {
-        const payload: ValidationPayload = {
-          validation: "denied",
-          content: "\n" + error.errorMessage?.replace(" | ", "  |  ") || "Exercise failed validation"
-        };
-        
-        await this.sendValidation(error.groupId, error.exerciseId, payload);
-        
-        console.log(`✅ ${error.studentId} - ${error.exerciseName}: Denied`);
-        successCount++;
-        
-        // Rate limiting - wait 500ms between requests
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-      } catch (err) {
-        console.error(`❌ ${error.studentId} - ${error.exerciseName}: Failed`);
-        console.error(`   ${err instanceof Error ? err.message : String(err)}`);
-        failCount++;
+    // Process in batches to control concurrency
+    const processBatch = async (batch: StudentValidation[]) => {
+      const promises = batch.map(async (validation) => {
+        try {
+          const payload: ValidationPayload = validation.status === 'VALID' 
+            ? {
+                validation: "valid",
+                content: "OK"
+              }
+            : {
+                validation: "denied",
+                content: "\n" + (validation.errorMessage?.replace(" | ", "  |  ") || "Exercise failed validation")
+              };
+          
+          await this.sendValidation(validation.groupId, validation.exerciseId, payload);
+          
+          const statusIcon = validation.status === 'VALID' ? '✅' : '❌';
+          const statusText = validation.status === 'VALID' ? 'Validated' : 'Denied';
+          console.log(`${statusIcon} ${validation.studentId} - ${validation.exerciseName}: ${statusText}`);
+          return { success: true, validation };
+          
+        } catch (err) {
+          console.error(`❌ ${validation.studentId} - ${validation.exerciseName}: Failed`);
+          console.error(`   ${err instanceof Error ? err.message : String(err)}`);
+          return { success: false, validation };
+        }
+      });
+      
+      return await Promise.all(promises);
+    };
+    
+    // Split validations into batches
+    for (let i = 0; i < validations.length; i += parallelJobs) {
+      const batch = validations.slice(i, i + parallelJobs);
+      const results = await processBatch(batch);
+      
+      results.forEach(result => {
+        if (result.success) {
+          successCount++;
+        } else {
+          failCount++;
+        }
+      });
+      
+      // Small delay between batches to avoid overwhelming the API
+      if (i + parallelJobs < validations.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
     
     console.log('\n' + '='.repeat(80));
     console.log(`✅ Success: ${successCount}`);
     console.log(`❌ Failed: ${failCount}`);
-    console.log(`📊 Total: ${errors.length}`);
+    console.log(`📊 Total: ${validations.length}`);
     console.log('='.repeat(80));
   }
 }

@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import ExcelJS from 'exceljs';
+import * as lockfile from 'proper-lockfile';
 
 export interface LogEntry {
   timestamp: string;
@@ -34,6 +35,16 @@ export class Logger {
     
     // If there's a specific error message (file not found, compilation error, etc.)
     if (result.error && !result.expectedOutput && !result.actualOutput) {
+      // Truncate long error messages for Excel display
+      const maxLength = 100;
+      if (result.error.length > maxLength) {
+        // Try to get the first line or meaningful part
+        const firstLine = result.error.split('\n')[0];
+        if (firstLine.length > maxLength) {
+          return firstLine.substring(0, maxLength) + '...';
+        }
+        return firstLine;
+      }
       return result.error;
     }
     
@@ -42,15 +53,8 @@ export class Logger {
       const expected = result.expectedOutput.trim();
       const actual = result.actualOutput.trim();
       
-      // If both are short enough, show inline
-      if (expected.length <= 30 && actual.length <= 30) {
-        return `Expected: "${expected}" | Got: "${actual}"`;
-      }
-      
-      // If too long, show truncated
-      const expectedShort = expected.substring(0, 30) + (expected.length > 30 ? '...' : '');
-      const actualShort = actual.substring(0, 30) + (actual.length > 30 ? '...' : '');
-      return `Expected: "${expectedShort}" | Got: "${actualShort}"`;
+      // Don't truncate the comparison - show full values
+      return `Expected: ${expected} | Got: ${actual}`;
     }
     
     // Fallback to error message or generic FAIL
@@ -62,15 +66,8 @@ export class Logger {
   }
   
   async writeLog(entry: LogEntry): Promise<string> {
-    await this.ensureLogDir();
-    
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const repoName = path.basename(entry.repoPath);
-    const filename = `${timestamp}_${repoName}_${entry.day}.json`;
-    const logPath = path.join(this.logDir, filename);
-    
-    await fs.writeJSON(logPath, entry, { spaces: 2 });
-    return logPath;
+    // JSON logging removed - only Excel is used now
+    return '';
   }
   
   async writeSummary(entries: LogEntry[]): Promise<string> {
@@ -128,7 +125,29 @@ export class Logger {
   async writeExcel(entry: LogEntry): Promise<void> {
     const excelPath = process.env.RESULTS_FILE || './results.xlsx';
     
-    let workbook: ExcelJS.Workbook;
+    // Acquire lock on the Excel file to prevent race conditions
+    const lockPath = excelPath + '.lock';
+    let release: (() => Promise<void>) | null = null;
+    const lockStart = Date.now();
+    
+    try {
+      // Wait up to 60 seconds to acquire lock (for parallel execution)
+      release = await lockfile.lock(excelPath, {
+        retries: {
+          retries: 120,  // More retries for highly parallel workloads
+          minTimeout: 500,
+          maxTimeout: 2000
+        },
+        stale: 60000,  // 60 second stale timeout
+        realpath: false  // Don't resolve symlinks - faster
+      });
+      
+      const lockWait = Date.now() - lockStart;
+      if (lockWait > 5000 && process.env.VERBOSE === 'true') {
+        console.log(`⏱️  Waited ${lockWait}ms for lock on ${excelPath}`);
+      }
+      
+      let workbook: ExcelJS.Workbook;
     
     // Load existing workbook or create new one
     const fileExists = await fs.pathExists(excelPath);
@@ -187,28 +206,10 @@ export class Logger {
         fgColor: { argb: 'FF0070C0' }
       };
       headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
-    } else {
-      // Worksheet exists - re-establish column keys for addRow to work correctly
-      const headers = ['Student ID', 'Score'];
-      const exerciseIds = entry.results.map(r => `Ex${r.id}`);
-      headers.push(...exerciseIds);
-      headers.push('GroupID');
-      
-      worksheet.columns = headers.map((h, idx) => {
-        const isGroupId = idx === headers.length - 1;
-        const isStudentId = idx === 0;
-        const isScore = idx === 1;
-        
-        return {
-          header: h,
-          key: isGroupId ? 'group_id' : 
-               isStudentId ? 'student_id' : 
-               isScore ? 'score' : 
-               `ex${entry.results[idx - 2]?.id}`,
-          width: isGroupId ? 12 : isStudentId ? 20 : isScore ? 25 : 15
-        };
-      });
     }
+    // DO NOT reset worksheet.columns if worksheet already exists!
+    // Setting worksheet.columns wipes out all existing data in ExcelJS
+    // The worksheet already has the correct structure from init_excel.py
     
     const studentId = process.env.STUDENT_NAME || path.basename(entry.repoPath);
     
@@ -227,7 +228,7 @@ export class Logger {
     });
     
     if (!studentRow) {
-      // Add new row
+      // Add new row - preserve any existing GroupID
       const rowData: any = { 
         student_id: studentId,
         score: `${entry.passedExercises}/${entry.totalExercises} passed (${entry.percentage}%)`
@@ -238,18 +239,30 @@ export class Logger {
         rowData[key] = this.formatErrorMessage(result);
       });
       
+      // Don't set GroupID here - it should be preserved from init_excel.py
+      
       studentRow = worksheet.addRow(rowData);
       studentRowNumber = studentRow.number;
     } else {
-      // Update existing row - score column
+      // Update existing row - preserve GroupID in last column
+      const lastColNumber = 3 + entry.results.length; // Student ID + Score + exercises
+      const existingGroupId = worksheet.getRow(studentRowNumber).getCell(lastColNumber + 1).value;
+      
+      // Update score column
       const scoreCell = worksheet.getRow(studentRowNumber).getCell(2);
       scoreCell.value = `${entry.passedExercises}/${entry.totalExercises} passed (${entry.percentage}%)`;
       
+      // Update exercise columns
       entry.results.forEach((result, idx) => {
         const colNumber = idx + 3; // +1 for 1-based, +1 for student_id, +1 for score
         const cell = worksheet.getRow(studentRowNumber).getCell(colNumber);
         cell.value = this.formatErrorMessage(result);
       });
+      
+      // Restore GroupID if it was there
+      if (existingGroupId) {
+        worksheet.getRow(studentRowNumber).getCell(lastColNumber + 1).value = existingGroupId;
+      }
     }
     
     // Style the Student ID cell (no background color)
@@ -266,6 +279,37 @@ export class Logger {
       const colNumber = idx + 3; // +1 for 1-based, +1 for student_id, +1 for score
       const cell = worksheet.getRow(studentRowNumber).getCell(colNumber);
       const cellValue = cell.value?.toString() || '';
+      
+      // Add comment/note with full error details if there's an error
+      if (!result.passed) {
+        let noteText = '';
+        
+        // For expected vs actual comparisons
+        if (result.expectedOutput !== undefined && result.actualOutput !== undefined) {
+          noteText = `Expected:\n${result.expectedOutput}\n\nGot:\n${result.actualOutput}`;
+        } 
+        // For other errors
+        else if (result.error && result.error.length > 100) {
+          noteText = result.error;
+        }
+        
+        // DISABLED: cell notes cause ExcelJS file corruption when re-reading
+        // The file becomes unreadable after being saved with notes
+        /*
+        if (noteText) {
+          cell.note = {
+            texts: [{ 
+              font: { size: 10, name: 'Calibri' },
+              text: noteText 
+            }],
+            margins: {
+              insetmode: 'custom',
+              inset: [0.13, 0.13, 0.13, 0.13]
+            }
+          };
+        }
+        */
+      }
       
       // Color based on actual cell value
       if (cellValue === 'OK') {
@@ -293,5 +337,12 @@ export class Logger {
     
     // Save workbook
     await workbook.xlsx.writeFile(excelPath);
+    
+    } finally {
+      // Always release the lock
+      if (release) {
+        await release();
+      }
+    }
   }
 }

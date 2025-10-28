@@ -150,4 +150,3 @@ env
 .env
 __pycache__/
 results.xlsx
-etna-validation-config.json
