@@ -9,6 +9,9 @@ export interface Exercise {
   expectedOutput: string;
   description: string;
   errorPattern?: string;
+  testType?: 'output' | 'return';  // Added: specify test type
+  functionName?: string;            // Added: function name to test
+  testInput?: any;                  // Added: input to pass to function
 }
 
 export interface SetupExercise {
@@ -297,7 +300,118 @@ export async function checkExercise(
     }
   }
   
-  // Run the TypeScript file using project's ts-node
+  // Handle return value testing (for functions that should return, not print)
+  if (exercise.testType === 'return' && exercise.functionName) {
+    try {
+      log(`🔍 Testing return value of function: ${exercise.functionName}`);
+      
+      const tsNodePath = path.join(projectRoot, 'node_modules', '.bin', 'ts-node');
+      const fileDir = path.dirname(filePath);
+      
+      // Read the original file
+      const originalCode = await fs.readFile(filePath, 'utf8');
+      
+      // Generate test input based on type
+      let testInputCode: string;
+      if (exercise.testInput === 'SUNDAY') {
+        // Special handling for enum - assume DaysOfWeek is defined in the file
+        testInputCode = `DaysOfWeek.${exercise.testInput}`;
+      } else if (typeof exercise.testInput === 'string') {
+        testInputCode = `"${exercise.testInput}"`;
+      } else {
+        testInputCode = String(exercise.testInput);
+      }
+      
+      // Append a test call at the end of the file
+      const modifiedCode = originalCode + `\n\n// Auto-generated test\nconsole.log(${exercise.functionName}(${testInputCode}));\n`;
+      
+      // Write modified code to a temporary file
+      const tempFilePath = path.join(fileDir, `__temp_${path.basename(filePath)}`);
+      await fs.writeFile(tempFilePath, modifiedCode);
+      
+      // Create a temporary minimal tsconfig.json in the repo directory
+      const tempTsConfig = path.join(fileDir, 'tsconfig.json');
+      const needsCleanup = !(await fileExists(tempTsConfig));
+      
+      if (needsCleanup) {
+        await fs.writeJSON(tempTsConfig, {
+          compilerOptions: {
+            module: 'commonjs',
+            target: 'ES2020',
+            esModuleInterop: true
+          }
+        });
+      }
+      
+      try {
+        const result = await execa(tsNodePath, [
+          '--transpileOnly',
+          path.basename(tempFilePath)
+        ], {
+          cwd: fileDir,
+          timeout: 10000
+        });
+        
+        // Clean up
+        await fs.remove(tempFilePath);
+        if (needsCleanup) {
+          await fs.remove(tempTsConfig);
+        }
+        
+        const actualOutput = normalizeOutput(result.stdout);
+        const expectedOutput = normalizeOutput(exercise.expectedOutput);
+        
+        const outputMatch = compareOutputs(exercise.expectedOutput, result.stdout);
+        
+        if (outputMatch) {
+          log(`✅ Return value matches expected: ${expectedOutput}`);
+        } else {
+          log('❌ Return value mismatch');
+          log('Expected:', JSON.stringify(expectedOutput));
+          log('Got:', JSON.stringify(actualOutput));
+        }
+        
+        return {
+          id: exercise.id,
+          name: exercise.name,
+          passed: outputMatch,
+          fileExists: true,
+          outputMatch,
+          expectedOutput,
+          actualOutput
+        };
+      } catch (execError: any) {
+        // Clean up
+        await fs.remove(tempFilePath).catch(() => {});
+        if (needsCleanup) {
+          await fs.remove(tempTsConfig).catch(() => {});
+        }
+        
+        log('❌ Function execution failed:', execError.message);
+        return {
+          id: exercise.id,
+          name: exercise.name,
+          passed: false,
+          fileExists: true,
+          outputMatch: false,
+          error: execError.message,
+          errorDetails: execError.stderr || execError.stdout || ''
+        };
+      }
+    } catch (err: any) {
+      log('❌ Return value test failed:', err.message);
+      return {
+        id: exercise.id,
+        name: exercise.name,
+        passed: false,
+        fileExists: true,
+        outputMatch: false,
+        error: err.message
+      };
+    }
+  }
+  
+  // Run the TypeScript file using project's ts-node (regular output testing)
   try {
     const tsNodePath = path.join(projectRoot, 'node_modules', '.bin', 'ts-node');
     const fileDir = path.dirname(filePath);

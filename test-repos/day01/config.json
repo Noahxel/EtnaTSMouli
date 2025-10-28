@@ -71,6 +71,9 @@
       "id": "09",
       "name": "calculateLength function",
       "file": "calculateLength.ts",
+      "testType": "return",
+      "functionName": "calculateLength",
+      "testInput": "Welcome to Code2Work!  ",
       "expectedOutput": "23",
       "description": "Fonction calculateLength(text: string): number"
     },
@@ -106,6 +109,9 @@
       "id": "14",
       "name": "isEven function",
       "file": "isEven.ts",
+      "testType": "return",
+      "functionName": "isEven",
+      "testInput": 7,
       "expectedOutput": "false",
       "description": "Fonction isEven(n: number): boolean"
     },
@@ -142,6 +148,9 @@
       "id": "19",
       "name": "dailyMessage",
       "file": "dailyMessage.ts",
+      "testType": "return",
+      "functionName": "dailyMessage",
+      "testInput": "SUNDAY",
       "expectedOutput": "Have a chill sunday!",
       "description": "Fonction dailyMessage(day: DaysOfWeek): string | null"
     },
