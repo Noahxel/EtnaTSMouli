@@ -153,18 +153,30 @@ export class Logger {
     if (!worksheet) {
       worksheet = workbook.addWorksheet(dayName);
       
-      // Initialize headers: Student ID | Score | Ex00 | Ex01 | Ex02 | ...
+      // Initialize headers: Student ID | Score | Ex00 | Ex01 | Ex02 | ... | GroupID
       const headers = ['Student ID', 'Score'];
       
       // Add exercise columns based on the results
       const exerciseIds = entry.results.map(r => `Ex${r.id}`);
       headers.push(...exerciseIds);
       
-      worksheet.columns = headers.map((h, idx) => ({
-        header: h,
-        key: idx === 0 ? 'student_id' : idx === 1 ? 'score' : `ex${entry.results[idx - 2]?.id}`,
-        width: idx === 0 ? 20 : idx === 1 ? 20 : 15
-      }));
+      // Add GroupID column at the end
+      headers.push('GroupID');
+      
+      worksheet.columns = headers.map((h, idx) => {
+        const isGroupId = idx === headers.length - 1;
+        const isStudentId = idx === 0;
+        const isScore = idx === 1;
+        
+        return {
+          header: h,
+          key: isGroupId ? 'group_id' : 
+               isStudentId ? 'student_id' : 
+               isScore ? 'score' : 
+               `ex${entry.results[idx - 2]?.id}`,
+          width: isGroupId ? 12 : isStudentId ? 20 : isScore ? 25 : 15
+        };
+      });
       
       // Style header row
       const headerRow = worksheet.getRow(1);
@@ -180,12 +192,22 @@ export class Logger {
       const headers = ['Student ID', 'Score'];
       const exerciseIds = entry.results.map(r => `Ex${r.id}`);
       headers.push(...exerciseIds);
+      headers.push('GroupID');
       
-      worksheet.columns = headers.map((h, idx) => ({
-        header: h,
-        key: idx === 0 ? 'student_id' : idx === 1 ? 'score' : `ex${entry.results[idx - 2]?.id}`,
-        width: idx === 0 ? 20 : idx === 1 ? 20 : 15
-      }));
+      worksheet.columns = headers.map((h, idx) => {
+        const isGroupId = idx === headers.length - 1;
+        const isStudentId = idx === 0;
+        const isScore = idx === 1;
+        
+        return {
+          header: h,
+          key: isGroupId ? 'group_id' : 
+               isStudentId ? 'student_id' : 
+               isScore ? 'score' : 
+               `ex${entry.results[idx - 2]?.id}`,
+          width: isGroupId ? 12 : isStudentId ? 20 : isScore ? 25 : 15
+        };
+      });
     }
     
     const studentId = process.env.STUDENT_NAME || path.basename(entry.repoPath);
@@ -245,8 +267,7 @@ export class Logger {
       const cell = worksheet.getRow(studentRowNumber).getCell(colNumber);
       const cellValue = cell.value?.toString() || '';
       
-      // Color based on actual cell value, not just result.passed
-      // because cell might contain previous value when updating
+      // Color based on actual cell value
       if (cellValue === 'OK') {
         cell.fill = {
           type: 'pattern',
@@ -255,12 +276,16 @@ export class Logger {
         };
         cell.font = { bold: true, color: { argb: 'FF006100' } };
       } else if (cellValue && cellValue !== '') {
+        // Error - red background
         cell.fill = {
           type: 'pattern',
           pattern: 'solid',
           fgColor: { argb: 'FFFF6B6B' } // Red
         };
         cell.font = { color: { argb: 'FF8B0000' } };
+      } else {
+        // Empty cell - no fill (white) - don't set any fill
+        // ExcelJS will leave it as default/no fill
       }
       
       cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };

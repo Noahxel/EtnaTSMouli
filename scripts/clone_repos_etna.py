@@ -190,6 +190,24 @@ def extraire_nom_eleve(project_name):
     return re.sub(r'[^a-z0-9_-]', '_', project_name.lower())
 
 
+def extraire_group_id(project_name):
+    """
+    Extrait le groupId depuis le nom du projet
+    Format: "Groupe de nom_eleve 1065535" -> 1065535
+
+    Args:
+        project_name (str): Nom du projet
+
+    Returns:
+        int or None: GroupId si trouvé, None sinon
+    """
+    # Pattern: "Groupe de student_name digits"
+    match = re.search(r'Groupe de [a-z_]+\s+(\d+)', project_name, re.IGNORECASE)
+    if match:
+        return int(match.group(1))
+    return None
+
+
 def clone_ou_pull_repo(project, dest_dir, numero_jour):
     """
     Clone un repo ou fait un git pull s'il existe déjà
@@ -290,16 +308,56 @@ def clone_repos_jour(numero_jour):
         return 0, 0
 
     print(f"✅ {len(projects)} projet(s) trouvé(s)\n")
+    
+    # Créer le fichier de log pour sauvegarder les groupIds
+    jour_formatted = f"day{int(numero_jour):02d}"
+    log_dir = os.path.join(config.BASE_DIR, jour_formatted)
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, "clone_log.txt")
+    
+    with open(log_file, 'w') as log:
+        log.write(f"Clone log for {jour_formatted}\n")
+        log.write(f"{'='*60}\n\n")
+        
+        # Cloner chaque projet
+        succes = 0
+        total = len(projects)
 
-    # Cloner chaque projet
-    succes = 0
-    total = len(projects)
-
-    for i, project in enumerate(projects, 1):
-        print(f"\n[{i}/{total}] {project['name']}")
-        if clone_ou_pull_repo(project, config.BASE_DIR, numero_jour):
-            succes += 1
-
+        for i, project in enumerate(projects, 1):
+            project_name = project['name']
+            nom_eleve = extraire_nom_eleve(project_name)
+            group_id = extraire_group_id(project_name)
+            
+            # Log project info with groupId
+            log.write(f"[{i}/{total}] {project_name}\n")
+            log.write(f"  Student: {nom_eleve}\n")
+            log.write(f"  GroupID: {group_id}\n\n")
+            
+            print(f"\n[{i}/{total}] {project_name}")
+            if clone_ou_pull_repo(project, config.BASE_DIR, numero_jour):
+                succes += 1
+    
+    print(f"\n✅ Clone log saved: {log_file}")
+    
+    # Automatically initialize/update Excel with GroupIDs
+    print(f"\n📊 Updating Excel file with students and GroupIDs...")
+    try:
+        import subprocess
+        init_script = os.path.join(os.path.dirname(__file__), 'init_excel.py')
+        result = subprocess.run(
+            ['python3', init_script, numero_jour],
+            capture_output=True,
+            text=True
+        )
+        if result.returncode == 0:
+            print(result.stdout)
+        else:
+            print(f"⚠️  Warning: Could not update Excel automatically")
+            print(f"   Run manually: python3 scripts/init_excel.py {numero_jour}")
+    except Exception as e:
+        print(f"⚠️  Warning: Could not update Excel automatically: {e}")
+        print(f"   Run manually: python3 scripts/init_excel.py {numero_jour}")
+    
     return succes, total
 
 
