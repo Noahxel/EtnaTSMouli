@@ -1,0 +1,729 @@
+Exercice 01 - displayNumbers function
+Dans ce premier exercice, vous allez vous familiariser avec les boucles en TypeScript. Les boucles permettent de répéter un bloc de code plusieurs fois sans avoir à le réécrire. Ici, vous allez créer une fonction qui affiche les nombres de 1 à 10.
+
+Imaginez que vous êtes en train de créer un outil d'apprentissage pour un futur étudiant de l'ETNA : vous voulez afficher chaque étape de son parcours, numérotée de 1 à 10, pour montrer la progression. Cette approche vous permet de voir comment la programmation peut automatiser des tâches répétitives. Vous allez donc utiliser une boucle for pour parcourir les nombres de 1 à 10 et les afficher un par un.
+
+Cet exercice vous permettra de comprendre la syntaxe d'une boucle et comment incrémenter une variable.
+
+Consignes
+Créer une fonction nommée displayNumbers.
+Utiliser une boucle for.
+Afficher les nombres de 1 à 10 dans le terminal.
+La fonction ne retourne rien.
+Exemple attendu dans le terminal :
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+Fichier attendu
+displayNumbers.ts
+
+Ressources
+Graphite : https://graphite.dev/guides/typescript-for-loop
+Tutorials Point : https://www.tutorialspoint.com/typescript/typescript_for_loop.htm
+
+Exercice 02 - displayLetters function
+Dans ce deuxième exercice, vous allez découvrir la boucle for...of, une syntaxe moderne qui permet de parcourir facilement les éléments d'un tableau ou les caractères d'une chaîne de caractères. Contrairement à la boucle for classique qui nécessite un index, for...of itère directement sur chaque élément.
+
+Imaginez que vous êtes en train de créer un petit programme d'analyse de texte pour un étudiant qui apprend à décomposer un mot lettre par lettre. Par exemple, pour comprendre l'orthographe d'un mot ou compter certaines lettres, il est utile de pouvoir parcourir chaque caractère individuellement. La boucle for...of est particulièrement adaptée à ce cas d'usage car elle rend le code plus lisible et plus intuitif.
+
+Cet exercice vous permettra de comprendre comment itérer sur une chaîne de caractères sans avoir à gérer manuellement un compteur ou un index, ce qui simplifie grandement votre code.
+
+Consignes
+Créer une fonction displayLetters.
+La fonction doit prendre un paramètre word de type string.
+Utiliser une boucle for...of pour parcourir chaque caractère de la chaîne.
+Afficher chaque lettre sur une ligne séparée dans le terminal.
+La fonction ne renvoie rien.
+Exemple attendu dans le terminal (pour la chaîne de charactère "This is a loop... This is a loop...") :
+
+T
+h
+i
+s
+
+i
+s
+
+a
+
+l
+o
+o
+p
+.
+.
+.
+
+T
+h
+i
+s
+
+i
+s
+
+a
+
+l
+o
+o
+p
+.
+.
+.
+Fichier attendu
+displayLetters.ts
+
+Ressources
+Mozilla Developer Network : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Statements/for...of
+
+Exercice 03 - displayKeys function
+Dans ce troisième exercice, vous allez découvrir la boucle for...in, qui permet de parcourir les clés d'un objet. Contrairement à for...of qui itère sur les valeurs d'itérables (tableaux, chaînes), for...in itère sur les propriétés énumérables d'un objet.
+
+Imaginez que vous manipulez un objet représentant un module de cours à l'ETNA. Vous voulez afficher la liste des propriétés disponibles pour ce module afin de générer dynamiquement des vues ou des rapports. Vous allez donc définir un type fort, créer un objet, puis lister ses clés dans le terminal.
+
+Consignes
+Définir une interface Module avec les propriétés suivantes:
+id de type number
+name de type string
+credits de type number
+Déclarer un objet module de type Module en paramètre.
+Créer une fonction nommée displayKeys.
+Utiliser une boucle for...in pour parcourir les clés de l'objet.
+Afficher chaque clé de l'objet sur une ligne séparée dans le terminal.
+La fonction ne renvoie rien.
+Exemple attendu dans le terminal :
+
+id
+name
+credits
+Fichier attendu
+displayKeys.ts
+
+Ressources
+Mozilla Developer Network : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Statements/for...in
+
+Exercice 04 - forEach
+Dans ce quatrième exercice, vous allez pratiquer la méthode forEach afin de comprendre son comportement : elle exécute une action pour chaque élément du tableau sans retourner un nouveau tableau. L'objectif est de modifier les éléments existants en place.
+
+Imaginez que vous travaillez pour une petite entreprise qui vient de récupérer une base de données de clients mal formatée. Les prénoms et noms ont été saisis en minuscules, ce qui n'est pas professionnel pour l'affichage. Vous devez normaliser ces données : mettre une majuscule à la première lettre du prénom et transformer le nom de famille complètement en majuscules, comme on le voit souvent dans les documents officiels ou les badges d'identification.
+
+La méthode forEach permet de modifier directement les objets existants dans le tableau. C'est particulièrement utile quand vous voulez mettre à jour des données en place sans créer de copies supplémentaires en mémoire.
+
+Consignes
+Déclarez une interface Customer avec les propriétés suivantes :
+firstname de type string (initialisé en minuscules)
+lastname de type string (initialisé en minuscules)
+phone de type string
+Initialisez un tableau nommé customers de type Customer[]
+Affichez le tableau complet de chaque client avant modification.
+Utilisez la méthode .forEach() pour modifier chaque objet en mettant une majuscule à la première lettre du prénom (victor -> Victor) et en remplaçant le nom de famille tout en majuscule (ménestrelus -> MÉNESTRELUS)
+Affichez le tableau complet après modification pour démontrer que les éléments ont été modifiés en place.
+Avec les clients :
+
+[
+    { firstname: 'victor', lastname: 'ménestrelus', phone: '123-456-7890' },
+    { firstname: 'alice', lastname: 'dupont', phone: '987-654-3210' },
+    { firstname: 'bob', lastname: 'martin', phone: '555-555-5555' },
+    { firstname: 'charlie', lastname: 'brown', phone: '444-444-4444' }
+]
+Voici l'exemple attendu dans le terminal :
+
+Before modification: [
+  {
+    firstname: 'victor',
+    lastname: 'ménestrelus',
+    phone: '123-456-7890'
+  },
+  { firstname: 'alice', lastname: 'dupont', phone: '987-654-3210' },
+  { firstname: 'bob', lastname: 'martin', phone: '555-555-5555' },
+  { firstname: 'charlie', lastname: 'brown', phone: '444-444-4444' }
+]
+After modification: [
+  {
+    firstname: 'Victor',
+    lastname: 'MÉNESTRELUS',
+    phone: '123-456-7890'
+  },
+  { firstname: 'Alice', lastname: 'DUPONT', phone: '987-654-3210' },
+  { firstname: 'Bob', lastname: 'MARTIN', phone: '555-555-5555' },
+  { firstname: 'Charlie', lastname: 'BROWN', phone: '444-444-4444' }
+]
+Fichier attendu
+forEach.ts
+
+Ressources
+LinkedIn : https://www.linkedin.com/pulse/foreach-vs-map-rohit-bansal/
+
+Exercice 05 - map
+Dans ce cinquième exercice, vous allez approfondir votre compréhension des boucles et des conditions. Vous allez itérer sur un tableau de nombres et ajouter 1 à l'élément quand vous tomber sur un nombre impair (parce ce que vous n'aimez pas les nombres impairs).
+
+Imaginez que vous êtes en train de créer un outil pour une petite calculatrice pédagogique qui met en évidence les nombres pairs. Ici, vous ne voulez détecter que les chiffres impairs pour illustrer la notion de condition dans une boucle. Vous allez donc combiner la fonction map avec une instruction if pour tester si un nombre est impair avant de le modifier.
+
+Cet exercice vous aidera à comprendre comment filtrer des informations avec des conditions, et comment utiliser l'opérateur modulo % pour vérifier si un nombre est divisible par 2. Cet exercice vous montrera la différence fondamentale entre forEach (qui modifie) et map (qui transforme), deux méthodes essentielles à maîtriser en TypeScript.
+
+Consignes
+Créez un tableau avec 20 nombres aléatoires.
+Parcourez le tableau avec la méthode .map() et ajoutez 1 à tous les chiffres impairs pour qu'ils deviennent pairs.
+Stockez le résultat dans un nouveau tableau de nombres nommé updatedNumbers.
+Affichez dans le terminal le nouveau tableau.
+Exemple attendu dans le terminal (avec les nombres : 842, 17, 593, 1000, 268, 731, 0, 456, 989, 312, 77, 624, 205, 918, 349, 58, 867, 430, 291, 752) :
+
+[
+  842,  18, 594, 1000, 268,
+  732,   0, 456,  990, 312,
+   78, 624, 206,  918, 350,
+   58, 868, 430,  292, 752
+]
+Fichier attendu
+map.ts
+
+Ressources
+GeeksforGeeks : https://www.geeksforgeeks.org/typescript/typescript-array-map-method/
+Tutorials teacher : https://www.tutorialsteacher.com/typescript/typescript-if-else
+
+Exercice 06 - displayWeatherMessage function
+Dans ce sixième exercice, vous allez découvrir comment utiliser l'instruction switch en TypeScript, un moyen élégant de gérer plusieurs cas possibles pour une même valeur. Le switch est souvent préféré aux longues séries de conditions if...else if...else, car il rend le code plus lisible et plus structuré.
+
+Imaginez que vous travaillez sur une application météo pour l'école. L'objectif est d'afficher un message différent en fonction de la météo actuelle. Vous allez utiliser un enum pour représenter les différents types de conditions météo (ensoleillé, pluvieux, nuageux, neigeux), puis un switch pour déterminer le message à afficher dans le terminal.
+
+Cet exercice vous apprendra à combiner enum et switch pour écrire un code clair et maintenable, tout en vous familiarisant avec la syntaxe propre à TypeScript.
+
+Consignes
+Créez un enum nommé Weather contenant les valeurs suivantes :
+Sunny
+Rainy
+Cloudy
+Snowy
+Stormy
+Windy
+Créez une fonction displayWeatherMessage qui prend un paramètre weather de type Weather.
+Dans la fonction, utilisez une instruction switch pour afficher un message différent selon la valeur de weather :
+Pour Sunny : "It's a bright and sunny day! ☀️"
+Pour Rainy : "Don't forget your umbrella! ☔️"
+Pour Cloudy : "Looks like it might rain later. ☁️"
+Pour Snowy : "Time for a snowball fight! ❄️"
+Pour Stormy : "Stay inside, it's dangerous out there! ⛈️"
+Pour Windy : "Hold on to your hat! 💨"
+Dans le cas par défaut : "Unknown weather condition."
+Testez la fonction avec plusieurs valeurs de l'énumération.
+Exemple attendu dans le terminal :
+
+Time for a snowball fight! ❄️
+It's a bright and sunny day! ☀️
+Hold on to your hat! 💨
+Looks like it might rain later. ☁️
+Unknown weather condition.
+Don't forget your umbrella! ☔️
+Stay inside, it's dangerous out there! ⛈️
+Fichier attendu
+displayWeatherMessage.ts
+
+Ressources
+Mozilla Developer Network : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/switch
+
+Exercice 07 - typeof
+Dans ce septième exercice, vous allez découvrir l'inférence de type de TypeScript : comment le compilateur déduit automatiquement le type d'une variable lorsqu'on l'initialise sans annotation explicite. L'approche est pratique et permet d'écrire du code plus concis tout en bénéficiant du typage statique.
+
+Imaginez que vous travaillez sur une petite fonctionnalité de journalisation. Un collègue vous donne une valeur dont il n'a pas précisé le type. Votre tâche est d'assigner la valeur à une variable sans la typer explicitement, puis d'afficher son type pour vérifier ce que TypeScript a inféré.
+
+Consignes
+Déclarez une variable untypedVariable sans annotation de type et assignez-lui une valeur.
+Affichez le type de la variable untypedVariable dans le terminal.
+Observez l'inférence TypeScript dans votre éditeur (survol de la variable avec la souris montre le type inféré).
+Exemple attendu dans le terminal (avec la valeur -42) :
+
+number
+Fichier attendu
+typeof.ts
+
+Ressources
+TypeScript : https://www.typescriptlang.org/docs/handbook/type-inference.html
+Medium : https://medium.com/@sahil90085/typescript-type-inference-a-comprehensive-guide-40c888c6d78f
+Mozilla developer Network : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Operators/typeof
+Stack Overflow : https://stackoverflow.com/questions/61134862/should-i-type-everything-in-typescript
+Exercice 08 - custom type
+Dans cet exercice, vous allez découvrir comment utiliser les alias de type (avec le keyword type) en TypeScript pour décrire des structures de données plus riches et expressives. L'objectif est ici de privilégier type plutôt qu'interface (ce qui n'est pas toujours le cas) et d'explorer des constructions avancées : unions et types littéraux.
+
+Imaginez que vous construisez le modèle de données pour une petite API interne de gestion d'événements. Un événement peut être de plusieurs types (meetup, workshop, webinar), et son ID peut être de différents types (string ou number). Vous devez définir des types précis et écrire un exemple d'utilisation pour montrer que le typage protège contre les erreurs courantes.
+
+Consignes
+Créez un type custom ID qui est du type number ou string.
+Créez un type custom EventType qui peut avoir la valeur kickoff, workshop, followup, delivery, ou defense.
+Créez une interface EtnaEvent qui contient les propriétés suivantes :
+id de type ID.
+name de type string.
+eventType de type EventType.
+Instanciez un nouvel objet constant etnaEvent de type EtnaEvent et assignez-lui les valeurs souhaitées.
+Affichez le nouvel événement dans le terminal.
+Exemple attendu dans le terminal (avec id: 12, name: "IDV-VUJS - day02 - ex08", et eventType: "followup") :
+
+{ id: 12, name: 'IDV-VUJS - day02 - ex08', eventType: 'followup' }
+Puis modifier la propriété id pour mettre un UUID (string)
+Puis modifier la propriété eventType pour mettre un 'workshop'
+Affichez l'objet modifié dans le terminal.
+Exemple attendu dans le terminal (avec id: "cfe5d908-5ba2-437e-bf54-e713eb6b2895", name: "IDV-VUJS - day02 - ex08", et eventType: "workshop") :
+
+{
+  id: 'cfe5d908-5ba2-437e-bf54-e713eb6b2895',
+  name: 'IDV-VUJS - day02 - ex08',
+  eventType: 'workshop'
+}
+Ensuite, mettez la propriété id à true.
+Et enfin, définissez la propriété eventType à "meeting".
+En compilant vous aurez les erreurs suivantes :
+
+error TS2322: Type 'boolean' is not assignable to type 'ID'.
+error TS2322: Type '"meeting"' is not assignable to type 'EventType'.
+Ces erreurs s'affichent également dans votre IDE au survol des variables.
+
+Fichier attendu
+customType.ts
+
+Ressources
+W3Schools : https://www.w3schools.com/typescript/typescript_union_types.php
+TypeScript : https://www.typescriptlang.org/docs/handbook/literal-types.html
+UUID Generator : https://www.uuidgenerator.net/version4
+
+Exercice 09 - optional
+Dans ce neuvième exercice, vous allez apprendre à définir des propriétés facultatives dans une interface TypeScript en utilisant le suffixe ?. Les propriétés optionnelles permettent de modéliser des objets dont toutes les informations ne sont pas obligatoires, ce qui est pratique pour des profils utilisateur, des paramètres de configuration ou des réponses d'API partielles.
+
+Imaginez que vous construisez un petit annuaire interne pour l'école. Certains utilisateurs n'ont pas de deuxième prénom, de téléphone public ou n'ont pas renseigné leur adresse. Vous allez définir un User avec des champs obligatoires et quelques champs facultatifs, puis instancier un objet qui montre ce cas.
+
+Consignes
+Créez un interface User qui contient les propriétés suivantes :
+id de type ID. (type définit dans l'exercice précédent)
+firstname de type string.
+middlename de type string (optionnel).
+lastname de type string.
+phone de type string (optionnel).
+address de type string (optionnel).
+Créez un objet user de type User et assignez lui les propriétés id, firstname, et lastname seulement.
+Votre objet doit être une constante.
+Affichez l'objet dans le terminal.
+Exemple attendu dans le terminal (avec id: "5426ccf9-f5c4-403d-9f2d-24b4397e9466", firstname: "Patrick", et lastname: "Ravassard") :
+
+{
+  id: 'cfe5d908-5ba2-437e-bf54-e713eb6b2895',
+  firstname: 'Patrick',
+  lastname: 'Ravassard'
+}
+Ensuite, définissez les propriétés middlename, phone, et address dans votre objet.
+Enfin, affichez à nouveau l'objet dans le terminal.
+Exemple attendu dans le terminal (avec id: "5426ccf9-f5c4-403d-9f2d-24b4397e9466", firstname: "Patrick", middlename: "Emmanuel", lastname: "Ravassard", phone: "+33 6 06 06 06 06", et address: "66, Avenue des Champs-Elysées, 75008, Paris" ) :
+
+{
+  id: 'cfe5d908-5ba2-437e-bf54-e713eb6b2895',
+  firstname: 'Patrick',
+  lastname: 'Ravassard',
+  middlename: 'Emmanuel',
+  phone: '+33 6 06 06 06 06',
+  address: '66, Avenue des Champs-Elysées, 75008, Paris'
+}
+Fichier attendu
+optional.ts
+
+Ressources
+Medium : https://medium.com/@robinviktorsson/typescript-and-es-modules-best-practices-for-imports-and-exports-9ce200e75a88
+Stack Overflow : https://stackoverflow.com/questions/47942141/optional-property-class-in-typescript
+DEV Community : https://dev.to/bridget_amana/optional-properties-in-typescript-1301
+
+Exercice 10 - default
+Rendre une propriété facultative n'est pas une fonctionnalité réservée aux objets : on peut également appliquer cette logique aux fonctions.
+En TypeScript, il est possible de définir des valeurs par défaut pour les paramètres d'une fonction. Cela permet d'éviter les erreurs lorsque certains arguments ne sont pas fournis, et d'écrire un code plus robuste et lisible.
+
+Dans ce dixième exercice, vous allez découvrir comment utiliser des paramètres par défaut pour rendre votre code plus flexible et expressif.
+
+Imaginez que vous développez un outil d'envoi d'email pour une application interne de l'ETNA.
+Vous souhaitez que l'objet (subject) et le contenu (message) soient obligatoires, mais que le champ de signature (signature) soit optionnel. Si aucune signature n'est fournie, la fonction doit automatiquement ajouter une signature par défaut ("– L'équipe Code2Work").
+
+Cet exercice vous permettra de comprendre comment définir des valeurs par défaut dans vos fonctions et comment TypeScript les gère au moment de l'appel.
+
+Consignes
+Créez une fonction sendEmail qui prend trois paramètres :
+subject de type string
+message de type string
+signature de type string, avec une valeur par défaut "– L'équipe Code2Work"
+La fonction doit afficher dans le terminal le contenu de l'email sous la forme suivante :
+Sujet : <subject>
+Message : <message>
+Signature : <signature>
+La fonction ne renvoie rien.
+Appelez la fonction deux fois :
+Une première fois sans passer le paramètre signature.
+Une deuxième fois en lui passant une signature personnalisée ("-- L'équipe pédagogique ETNA").
+Exemple attendu dans le terminal :
+
+Sujet : Bienvenue à la Semaine 04 !
+Message : Vous débutez aujourd'hui votre deuxième journée sur Vue.js.
+Signature : - L'équipe Code2Work
+
+Sujet : Bravo pour vos progrès !
+Message : Vous avez terminé la partie sur les boucles en TypeScript.
+Signature : -- L'équipe pédagogique ETNA
+Fichier attendu
+default.ts
+
+Ressources
+TypeScript : https://www.typescriptlang.org/docs/handbook/functions.html#optional-and-default-parameters
+Tutorials Teacher : https://www.tutorialsteacher.com/typescript/typescript-function
+
+Exercice 11 - nothing
+Dans ce onzième exercice, vous allez explorer les types spéciaux de TypeScript : null, undefined, unknown, et void.
+Ces types ne représentent pas des données classiques, mais des états particuliers : absence de valeur, type inconnu, ou fonction ne retournant rien.
+Bien les comprendre permet d'écrire un code plus sûr et d'éviter des erreurs logiques subtiles.
+
+Imaginez que vous travaillez sur une petite application interne de monitoring à l'ETNA.
+Certains capteurs peuvent :
+
+Renvoyer une valeur numérique (number),
+Ne pas encore être initialisés (undefined),
+Etre déconnectés (null),
+Ou retourner un type inconnu si la donnée n'a pas été validée (unknown).
+De plus, certaines fonctions système ne retournent jamais (par exemple lorsqu'elles lèvent une erreur) et retourne le type never, tandis que d'autres ne retournent rien du tout (void), comme une simple fonction de log.
+
+Cet exercice vous permettra de distinguer les usages de ces types spéciaux à travers des cas concrets.
+
+Consignes
+Créez une fonction getUserName pour qu'elle :
+prenne un paramètre user de type { name?: string }
+retourne undefined si user.name n'est pas défini
+retourne une chaîne "Anonymous" si user.name vaut null
+retourne le nom sinon.
+Créez une fonction processValue :
+prend un paramètre value de type unknown
+si value est une chaîne de caractères, affiche sa longueur
+si value est un nombre, affiche sa valeur multipliée par 2
+sinon, affiche "Type non reconnu"
+Implémentez une fonction logMessage :
+prend un paramètre message de type string
+ne retourne rien (void)
+affiche le message dans la console.
+Testez les trois fonctions avec différents cas pour observer les comportements.
+En lançant ceci :
+
+console.log("=== Test getUserName: ===");
+console.log(getUserName({ name: "Alice" }));
+console.log(getUserName({}));
+
+console.log("\n=== Test processValue: ===");
+processValue("Hello");
+processValue(21);
+processValue(true);
+processValue({ key: "value" });
+
+console.log("\n=== Test logMessage: ===");
+logMessage("Ceci est un message de test");
+logMessage("TypeScript est génial !");
+L'exemple attendu dans le termine est :
+
+=== Test getUserName: ===
+Alice
+null
+
+=== Test processValue: ===
+Longueur de la chaîne : 5
+Valeur multipliée par 2 : 42
+Type non reconnu
+Type non reconnu
+
+=== Test logMessage: ===
+Ceci est un message de test
+TypeScript est génial !
+Fichier attendu
+nothing.ts
+
+Ressources
+TypeScript : https://www.typescriptlang.org/docs/handbook/basic-types.html#null-and-undefined
+Stack Overflow : https://stackoverflow.com/questions/5076944/what-is-the-difference-between-null-and-undefined-in-javascript
+Stack Overflow : https://stackoverflow.com/questions/51439843/unknown-vs-any
+Tutorials Teacher : https://www.tutorialsteacher.com/typescript/typescript-void
+
+Exercice 12 - error handling
+Dans ce douzième exercice, vous allez apprendre à gérer les erreurs en TypeScript à l'aide des blocs try, catch et de l'instruction throw. Vous découvrirez également le type spécial never, utilisé pour représenter une fonction qui ne retourne jamais de valeur normale (par exemple, une fonction qui lance toujours une erreur).
+
+Imaginez que vous développez un petit module de vérification de notes pour une école. Votre programme reçoit une note numérique et doit s'assurer qu'elle est valide (entre 0 et 20). Si la note n'est pas valide, votre code doit lancer une erreur explicite. Vous allez aussi devoir capturer cette erreur proprement pour éviter qu'elle ne fasse planter votre programme.
+
+Cet exercice vous aidera à comprendre à détecter et signaler des erreurs avec throw, à protéger le code sensible avec try...catch, et à définir une fonction de type never, utile lorsqu'un flux de code ne se termine jamais normalement (ex. : erreur fatale).
+
+Consignes
+Créez une fonction validateGrade qui prend un paramètre grade de type number.
+Si la note est inférieure à 0 ou supérieure à 20 :
+Appelez une fonction throwError (que vous allez créer) pour lancer une erreur.
+Si la note est valide :
+Affichez "Valid grade: X" dans le terminal.
+Créez une fonction throwError :
+Elle prend un paramètre message de type string.
+Elle lance une erreur avec throw.
+Elle a pour type de retour never (car elle ne retourne jamais).
+Encapsulez l'appel à validateGrade dans un bloc try...catch.
+Dans le catch, affichez le message d'erreur dans le terminal avec la méthode console.error().
+Avec trois appels successifs, voici l'exemple attendu dans le terminal :
+
+Valid grade: 18
+Error: Invalid grade: 42
+# ... avec des logs d'erreur
+Error: Invalid grade: -5
+# ... avec des logs d'erreur
+Fichier attendu
+errorHandling.ts
+
+Ressources
+TypeScript Handbook : https://www.typescriptlang.org/docs/handbook/2/narrowing.html#the-never-type
+Mozilla Developer Network : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Statements/try...catch
+TypeScript Deep Dive : https://basarat.gitbook.io/typescript/type-system/never
+W3Schools : https://www.w3schools.com/jsref/met_console_error.asp
+
+Exercice 13 - asynchronicity
+Dans ce treizième exercice, vous allez découvrir la gestion de l'asynchronicité en TypeScript à l'aide des mots-clés async et await. Vous allez ajouter également une gestion d'erreur avec throw et try...catch.
+
+Imaginez que vous construisez un petit simulateur de requête API pour un étudiant qui apprend à comprendre le comportement asynchrone de JavaScript. Vous allez créer une fonction qui simule une requête réseau : elle renvoie une promesse qui se résout ou échoue après un court délai.
+Votre but sera de gérer correctement les succès et les échecs, tout en affichant des messages clairs dans le terminal.
+
+Cet exercice vous permettra de comprendre le fonctionnement de async / await, la gestion des erreurs dans les promesses (throw + try...catch), le chaînage logique des opérations asynchrones
+
+Consignes
+Créez une fonction simulateApiCall :
+Elle prend un paramètre shouldSucceed de type boolean.
+Elle retourne une promesse qui :
+se résout avec le message "Data received successfully!" si shouldSucceed est true.
+se rejette avec une erreur "API call failed!" si shouldSucceed est false.
+Utilisez setTimeout pour simuler un délai de 1 seconde avant la résolution ou le rejet de la promesse.
+Créez ensuite une fonction asynchrone fetchData :
+Elle prend le même paramètre shouldSucceed de type boolean.
+Elle appelle simulateApiCall.
+Elle capture les erreurs avec try...catch.
+Si une erreur est interceptée, affichez le message d'erreur dans le terminal avec console.error.
+Toutes les fonctions doivent avoir des retours de fonction typés.
+Appelez fetchData(true) puis fetchData(false) à la chaine pour démontrer les deux cas.
+Appelez enfin fetchData(true) puis fetchData(false) sans les chaîner.
+exemple attendu dans le terminal :
+
+Fetching data...
+Fetching data...
+Fetching data...
+[OK] Data received successfully!
+Fetching data...
+[OK] Data received successfully!
+[KO] Error: API call failed!
+[KO] Error: API call failed!
+Fichier attendu
+asynchronicity.ts
+
+Astuces
+Attention, vous aurez sans doute une erreur de compilation si vous utilisez tsc. Pensez à regarder le flag --lib ;)
+Ressources
+LogRocket : https://blog.logrocket.com/async-await-typescript/
+W3Schools : https://www.w3schools.com/typescript/typescript_async.php
+Mozilla Developer Network : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Statements/async_function
+TypeScript : https://www.typescriptlang.org/tsconfig/#target
+
+Exercice 14 - class
+Dans ce quatorzième exercice, vous allez découvrir la syntaxe de base des classes en TypeScript. Les classes sont un pilier de la programmation orientée objet : elles permettent de regrouper des données (propriétés) et des comportements (méthodes) au sein d'une même structure logique.
+
+Imaginez que vous débutez la conception d'un petit module de gestion d'étudiants. Avant d'ajouter des propriétés et des méthodes, vous allez simplement déclarer une classe vide et tester son instanciation.
+L'objectif ici est de comprendre comment créer une classe, comment l'utiliser pour créer un objet, et comment vérifier le type de cet objet à l'exécution grâce à l'opérateur instanceof.
+
+Cet exercice constitue la première étape avant d'ajouter des constructeurs, des propriétés et des méthodes dans les prochains exercices.
+
+Consignes
+Créez une classe nommée Student.
+Ne lui ajoutez aucune propriété ni méthode (classe vide).
+Créez une constante student qui instancie une classe Student.
+Vérifiez si l'étudiant est bien une instance de la classe Student à l'aide de instanceof.
+Affichez le résultat dans le terminal.
+Créez une constante foo de type any (ne faites jamais ça ailleurs, on rappelle : n'utiliser jamais any).
+Vérifiez également si foo est une instance de la classe Student.
+Exemple attendu dans le terminal :
+
+true
+false
+Fichier attendu
+class.ts
+
+Ressources
+TypeScript Handbook : https://www.typescriptlang.org/docs/handbook/classes.html
+Mozilla Developer Network : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Classes
+W3Schools : https://www.w3schools.com/typescript/typescript_classes.php
+
+Exercice 15 - class method
+Dans cet exercice, vous allez apprendre à ajouter des méthodes dans une classe TypeScript. Une méthode est une fonction qui appartient à une classe et permet de définir un comportement pour ses instances.
+
+Imaginez que vous développez un petit module pour gérer des étudiants. Chaque étudiant peut présenter son nom dans la console. Vous allez donc créer une classe avec une méthode qui affiche un message avec console.log.
+
+Consignes
+Créez une classe nommée Robot.
+Ajoutez une méthode announce à la classe Robot qui :
+n'a aucun paramètre,
+affiche dans le terminal le message : "Beep boop! I am robot...".
+Créez une instance r2d2 de la classe Robot.
+Appelez la méthode announce de l'instance nouvellement créé.
+Fichier attendu
+classMethod.ts
+
+Ressources
+Aucune ressource disponible pour cet exercice.
+
+Exercice 16 - class properties
+Dans ce seizième exercice, vous allez apprendre à créer une classe avec des propriétés publiques en TypeScript. Les propriétés permettent de stocker des informations propres à chaque instance d'une classe.
+
+Imaginez que vous développez un petit module pour gérer des voitures dans un garage. Chaque voiture possède un modèle et une couleur par défaut.
+L'objectif ici est de se familiariser avec la déclaration de propriétés directement dans la classe.
+
+Consignes
+Créez une classe nommée Car.
+Ajoutez trois propriétés publiques :
+model de type string initialisée à "Tesla Model Y",
+color de type string initialisée à "Red".
+mileage de type number initialisée à 32595.
+Créez une instance myCar de la classe Car.
+Affichez les propriétés model, color, et mileage dans le terminal.
+Exemple attendu dans le terminal :
+
+Car model: Tesla Model Y
+Car color: Red
+Car mileage: 32595
+Fichier attendu
+classProperties.ts
+
+Ressources
+Aucune ressource disponible pour cet exercice.
+
+Exercice 17 - constructor
+Dans cet exercice, vous allez apprendre à utiliser un constructeur en TypeScript. Le constructeur est une fonction spéciale d'une classe qui est appelée automatiquement lors de la création d'une instance. Il permet d'initialiser les propriétés de l'objet avec des valeurs spécifiques.
+
+Imaginez que vous développez un module pour gérer des livres dans une bibliothèque. Chaque livre possède un titre, un auteur et une année de publication. Vous allez créer une classe avec un constructeur qui initialise ces propriétés au moment de l'instanciation.
+
+Consignes
+Créez une classe nommée Book.
+Ajoutez trois propriétés publiques (sans valeur par défaut) :
+title de type string,
+author de type string,
+year de type number.
+Créez un constructeur qui prend les trois valeurs comme paramètres et initialise les propriétés.
+Créez une instance myBook de la classe Book avec :
+title: "La Délicatesse",
+author: "David Foenkinos",
+year: 2009.
+Affichez la classe complète dans le terminal.
+Affichez toutes les propriétés dans le terminal.
+Exemple attendu dans le terminal :
+
+Book { title: 'La Délicatesse', author: 'David Foenkinos', year: 2009 }
+Title: La Délicatesse
+Author: David Foenkinos
+Year: 2009
+Fichier attendu
+constructor.ts
+
+Ressources
+Aucune ressource disponible pour cet exercice.
+
+Exercice 18 - bank
+Dans cet exercice, vous allez apprendre à créer une classe complète en TypeScript qui combine plusieurs concepts essentiels de la programmation orientée objet. Vous allez définir des propriétés publiques et privées, créer un constructeur pour initialiser ces propriétés et ajouter des méthodes pour accéder ou modifier les informations de manière contrôlée. L'objectif est de comprendre comment structurer une classe pour protéger certaines données tout en permettant des interactions sécurisées avec ses instances.
+
+Imaginez que vous développez un module pour gérer des comptes bancaires. Chaque compte possède un nom de propriétaire accessible publiquement et un solde privé qui ne doit pas être modifié directement. Pour interagir avec le solde, vous allez créer des méthodes permettant de consulter le montant disponible, d'effectuer des dépôts ou de retirer de l'argent, tout en appliquant les règles de sécurité nécessaires, par exemple en refusant les retraits qui dépassent le solde disponible.
+
+Cet exercice vous aidera à bien comprendre la différence entre les propriétés publiques et privées. Vous verrez également l'importance du constructeur pour initialiser correctement une instance avec des valeurs spécifiques dès sa création. Enfin, vous découvrirez comment créer des méthodes qui manipulent les données de manière sécurisée, tout en respectant l'encapsulation et le principe de responsabilité unique de chaque classe.
+
+Consignes
+Créez une classe nommée BankAccount.
+Ajoutez les propriétés suivantes :
+owner de type string (publique),
+balance de type number (privée).
+Créez un constructeur qui prend owner et balance comme paramètres, initialise les propriétés et affiche la balance initiale.
+Ajoutez une méthode deposit(amount: number) qui :
+ajoute amount à la balance du compte,
+affiche le nouveau solde dans le terminal.
+Ajoutez une méthode withdraw(amount: number) qui :
+soustrait amount de la balance du compte si le solde est suffisant
+sinon, affiche le message d'erreur "Insufficient funds"
+affiche le solde après chaque opération.
+Ajoutez une méthode checkBalance() qui affiche le solde actuel dans le terminal.
+Créez une instance myAccount de type BankAccount avec owner: "Alice" et balance: 1000.
+Testez les méthodes : deposit (avec en paramètre 100), withdraw (avec en paramètre 300), checkBalance, deposit (avec en paramètre 50), withdraw (avec en paramètre 10000).
+Exemple attendu dans le terminal :
+
+Initial balance: 1000
+New balance: 1100
+Balance: 800
+Current balance: 800
+New balance: 850
+Insufficient funds
+Balance: 850
+Fichier attendu
+bank.ts
+
+Ressources
+Dennis O'Keeffe : https://www.dennisokeeffe.com/blog/2025-07-16-typescript-private-elements-vs-private-modifiers
+
+Exercice 19 - arrow function
+Dans ce dix-neuvième exercice, vous allez découvrir les arrow functions en TypeScript. Les arrow functions sont une manière moderne et concise de déclarer des fonctions, particulièrement utile pour les callbacks et les fonctions anonymes. Elles permettent également de gérer le contexte de this de manière plus prévisible qu'avec les fonctions classiques.
+
+Imaginez que vous développez un petit module pour calculer les prix de différents articles dans un panier. Vous souhaitez appliquer une remise à chaque article et obtenir rapidement le prix final. Pour cela, vous allez utiliser une arrow function qui prend le prix initial et le pourcentage de remise, puis retourne le prix réduit. Cet exercice vous aidera à comprendre la syntaxe simplifiée des arrow functions et à les utiliser dans des situations pratiques.
+
+Consignes
+Créez une arrow function nommée applyDiscount qui prend deux paramètres :
+price de type number (le prix doit être positif),
+discount de type number (en pourcentage).
+La fonction doit retourner le prix après application de la remise.
+Testez la fonction avec plusieurs valeurs et affichez le résultat dans le terminal.
+Créez ensuite un tableau de prix (ex: [100, 250.99, 50, 400, 1574.45, 98, 104.50]) et utilisez la méthode .map() avec votre arrow function pour appliquer une remise de 10% à chaque prix.
+Filtrez le tableau avec la méthode .filter() pour garder seulement les prix inférieurs à 100 euros.
+Affichez le nouveau tableau dans le terminal.
+Exemple attendu dans le terminal :
+
+Prices with 10% discount: [ 90, 225.89100000000002, 45, 360, 1417.005, 88.2, 94.05 ]
+Prices under 90 euros: [ 90, 45, 88.2, 94.05 ]
+Fichier attendu
+arrowFunction.ts
+
+Ressources
+Mozilla Developer Network : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter
+
+Exercice 20 - generic
+Dans ce vingtième et dernier exercice, vous allez découvrir une des notions les plus puissantes de TypeScript : le typage générique.
+Les génériques permettent d'écrire du code réutilisable, flexible et sûr, en adaptant automatiquement les types à ceux des données manipulées.
+
+Imaginez que vous faites partie d'une équipe chargée de créer des fonctions utilitaires partagées entre tous les modules de l'application.
+Votre objectif est d'éviter de dupliquer du code tout en maintenant une sécurité de typage stricte.
+
+Au lieu d'écrire une fonction différente pour chaque type (string, number, boolean...), vous allez créer des fonctions génériques, capables de s'adapter dynamiquement à tout type tout en restant entièrement typées.
+
+Cet exercice vous permettra de comprendre comment définir, contraindre et utiliser les types génériques, un pilier de TypeScript moderne.
+
+Consignes
+Créez une fonction identity<T>(value: T): T
+Elle doit simplement retourner la valeur passée en paramètre.
+Appelez-la avec un number et un string, puis affichez les résultats dans le terminal.
+Créez une fonction getFirstElement<T>(array: T[]): T | undefined
+Elle doit retourner le premier élément du tableau reçu en paramètre.
+Testez-la avec un tableau de nombres et un tableau de chaînes de caractères.
+Définissez une interface EtnaUser représentant un étudiant, contenant les propriétés suivantes :
+id de type string
+name de type string
+promotion de type number
+Créez une fonction générique printUserProperty<T, K extends keyof T>(obj: T, key: K): void
+Elle doit afficher la valeur d'une propriété d'un objet, tout en garantissant que la clé existe réellement sur cet objet (grâce à la contrainte extends keyof T).
+Testez la fonction avec un objet EtnaUser et affichez les propriétés name et promotion.
+Exemple attendu dans le terminal :
+
+42
+Hello Code2Work
+1
+Alice
+Promotion : 2026
+Fichier attendu
+generic.ts
+
+Ressources
+W3Schools : https://www.w3schools.com/typescript/typescript_basic_generics.php
+Medium : https://medium.com/@ignatovich.dm/typescript-generics-a-simple-guide-with-practical-examples-ca3492eb821f

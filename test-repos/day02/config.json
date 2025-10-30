@@ -1,0 +1,190 @@
+{
+  "day": "day02",
+  "baseDir": "IDV-VUJS/day02/loops-and-classes",
+  "exercises": [
+    {
+      "id": "01",
+      "name": "displayNumbers function",
+      "file": "displayNumbers.ts",
+      "expectedOutput": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10",
+      "description": "Fonction displayNumbers avec boucle for",
+      "functionName": "displayNumbers",
+      "functionParams": []
+    },
+    {
+      "id": "02",
+      "name": "displayLetters function",
+      "file": "displayLetters.ts",
+      "expectedOutput": "T\nh\ni\ns\n \ni\ns\n \na\n \nl\no\no\np\n.\n.\n.\n \nT\nh\ni\ns\n \ni\ns\n \na\n \nl\no\no\np\n.\n.\n.",
+      "description": "Fonction displayLetters avec boucle for...of",
+      "functionName": "displayLetters",
+      "functionParams": ["This is a loop... This is a loop..."]
+    },
+    {
+      "id": "03",
+      "name": "displayKeys function",
+      "file": "displayKeys.ts",
+      "expectedOutput": "id\nname\ncredits",
+      "description": "Interface Module et fonction displayKeys avec for...in",
+      "functionName": "displayKeys",
+      "functionParams": [{"id": 1, "name": "TypeScript Basics", "credits": 5}]
+    },
+    {
+      "id": "04",
+      "name": "forEach",
+      "file": "forEach.ts",
+      "expectedOutput": "Before modification: [\n  {\n    firstname: 'victor',\n    lastname: 'ménestrelus',\n    phone: '123-456-7890'\n  },\n  { firstname: 'alice', lastname: 'dupont', phone: '987-654-3210' },\n  { firstname: 'bob', lastname: 'martin', phone: '555-555-5555' },\n  { firstname: 'charlie', lastname: 'brown', phone: '444-444-4444' }\n]\nAfter modification: [\n  {\n    firstname: 'Victor',\n    lastname: 'MÉNESTRELUS',\n    phone: '123-456-7890'\n  },\n  { firstname: 'Alice', lastname: 'DUPONT', phone: '987-654-3210' },\n  { firstname: 'Bob', lastname: 'MARTIN', phone: '555-555-5555' },\n  { firstname: 'Charlie', lastname: 'BROWN', phone: '444-444-4444' }\n]",
+      "description": "Interface Customer et modification avec forEach"
+    },
+    {
+      "id": "05",
+      "name": "map",
+      "file": "map.ts",
+      "expectedOutput": "[\n  842,  18, 594, 1000, 268,\n  732,   0, 456,  990, 312,\n   78, 624, 206,  918, 350,\n   58, 868, 430,  292, 752\n]",
+      "description": "Utilisation de map pour transformer les nombres impairs"
+    },
+    {
+      "id": "06",
+      "name": "displayWeatherMessage function",
+      "file": "displayWeatherMessage.ts",
+      "expectedOutput": "Time for a snowball fight! ❄️\nIt's a bright and sunny day! ☀️\nHold on to your hat! 💨\nLooks like it might rain later. ☁️\nUnknown weather condition.\nDon't forget your umbrella! ☔️\nStay inside, it's dangerous out there! ⛈️",
+      "description": "Enum Weather et fonction displayWeatherMessage avec switch"
+    },
+    {
+      "id": "07",
+      "name": "typeof",
+      "file": "typeof.ts",
+      "expectedOutput": "number",
+      "description": "Inférence de type et utilisation de typeof"
+    },
+    {
+      "id": "08",
+      "name": "custom type",
+      "file": "customType.ts",
+      "expectedOutput": "",
+      "description": "Types personnalisés ID et EventType, interface EtnaEvent - compilation errors are EXPECTED",
+      "testType": "structure",
+      "requiredPatterns": [
+        "type\\s+ID\\s*=",
+        "type\\s+EventType\\s*=",
+        "interface\\s+EtnaEvent\\s*\\{",
+        "id:\\s*ID",
+        "eventType:\\s*EventType"
+      ],
+      "allowCompilationErrors": true
+    },
+    {
+      "id": "09",
+      "name": "optional",
+      "file": "optional.ts",
+      "expectedOutput": "",
+      "description": "Interface User avec propriétés optionnelles",
+      "testType": "structure",
+      "requiredPatterns": [
+        "type\\s+ID\\s*=",
+        "interface\\s+User\\s*\\{",
+        "id:\\s*ID",
+        "firstname:\\s*string",
+        "lastname:\\s*string",
+        "middlename\\?:\\s*string",
+        "phone\\?:\\s*string",
+        "address\\?:\\s*string",
+        "const\\s+\\w+:\\s*User\\s*=",
+        "console\\.log"
+      ]
+    },
+    {
+      "id": "10",
+      "name": "default",
+      "file": "default.ts",
+      "expectedOutput": "Sujet : Bienvenue à la Semaine 04 !\nMessage : Vous débutez aujourd'hui votre deuxième journée sur Vue.js.\nSignature : – L'équipe Code2Work\n\nSujet : Bravo pour vos progrès !\nMessage : Vous avez terminé la partie sur les boucles en TypeScript.\nSignature : -- L'équipe pédagogique ETNA",
+      "description": "Fonction sendEmail avec paramètre par défaut"
+    },
+    {
+      "id": "11",
+      "name": "nothing",
+      "file": "nothing.ts",
+      "expectedOutput": "=== Test getUserName: ===\nAlice\nundefined\n\n=== Test processValue: ===\nLongueur de la chaîne : 5\nValeur multipliée par 2 : 42\nType non reconnu\nType non reconnu\n\n=== Test logMessage: ===\nCeci est un message de test\nTypeScript est génial !",
+      "description": "Types spéciaux: null, undefined, unknown, void"
+    },
+    {
+      "id": "12",
+      "name": "error handling",
+      "file": "errorHandling.ts",
+      "expectedOutput": "Valid grade: 18\nError: Invalid grade: 42\nError: Invalid grade: -5",
+      "description": "Gestion d'erreurs avec try, catch, throw et type never",
+      "useStandardizedTests": true,
+      "testCode": "// Standardized tests\ntry {\n  validateGrade(18);\n} catch (error) {\n  console.error(`Error: ${(error as Error).message}`);\n}\n\ntry {\n  validateGrade(42);\n} catch (error) {\n  console.error(`Error: ${(error as Error).message}`);\n}\n\ntry {\n  validateGrade(-5);\n} catch (error) {\n  console.error(`Error: ${(error as Error).message}`);\n}"
+    },
+    {
+      "id": "13",
+      "name": "asynchronicity",
+      "file": "asynchronicity.ts",
+      "description": "Asynchronicité avec async/await et Promise",
+      "testType": "structure",
+      "expectedOutput": "",
+      "requiredPatterns": [
+        "simulateApiCall.*Promise<string>",
+        "fetchData.*Promise<void>",
+        "async",
+        "await\\s+simulateApiCall",
+        "console\\.log.*Fetching data",
+        "\\[OK\\]",
+        "\\[KO\\]"
+      ]
+    },
+    {
+      "id": "14",
+      "name": "class",
+      "file": "class.ts",
+      "expectedOutput": "true\nfalse",
+      "description": "Déclaration de classe et instanceof"
+    },
+    {
+      "id": "15",
+      "name": "class method",
+      "file": "classMethod.ts",
+      "expectedOutput": "Beep boop! I am robot...",
+      "description": "Classe Robot avec méthode announce"
+    },
+    {
+      "id": "16",
+      "name": "class properties",
+      "file": "classProperties.ts",
+      "expectedOutput": "Car model: Tesla Model Y\nCar color: Red\nCar mileage: 32595",
+      "description": "Classe Car avec propriétés publiques"
+    },
+    {
+      "id": "17",
+      "name": "constructor",
+      "file": "constructor.ts",
+      "expectedOutput": "Book { title: 'La Délicatesse', author: 'David Foenkinos', year: 2009 }\nTitle: La Délicatesse\nAuthor: David Foenkinos\nYear: 2009",
+      "description": "Classe Book avec constructeur"
+    },
+    {
+      "id": "18",
+      "name": "bank",
+      "file": "bank.ts",
+      "expectedOutput": "Initial balance: 1000\nNew balance: 1100\nBalance: 800\nCurrent balance: 800\nNew balance: 850\nInsufficient funds\nBalance: 850",
+      "description": "Classe BankAccount avec propriété privée",
+      "useStandardizedTests": true,
+      "testCode": "// Standardized tests\nconst myAccount = new BankAccount(\"Alice\", 1000);\nmyAccount.deposit(100);\nmyAccount.withdraw(300);\nmyAccount.checkBalance();\nmyAccount.deposit(50);\nmyAccount.withdraw(10000);"
+    },
+    {
+      "id": "19",
+      "name": "arrow function",
+      "file": "arrowFunction.ts",
+      "expectedOutput": "Prices with 10% discount: [90, 225.89100000000002, 45, 360, 1417.005, 88.2, 94.05]\nPrices under 100 euros: [90, 45, 88.2, 94.05]",
+      "description": "Arrow function applyDiscount avec map et filter",
+      "useStandardizedTests": true,
+      "testCode": "// Standardized tests\nconst prices: number[] = [100, 250.99, 50, 400, 1574.45, 98, 104.50];\nconst discountedPrices = prices.map(price => applyDiscount(price, 10));\nconsole.log(`Prices with 10% discount: [${discountedPrices.join(', ')}]`);\nconst pricesUnder100 = discountedPrices.filter(price => price < 100);\nconsole.log(`Prices under 100 euros: [${pricesUnder100.join(', ')}]`);"
+    },
+    {
+      "id": "20",
+      "name": "generic",
+      "file": "generic.ts",
+      "expectedOutput": "42\nHello Code2Work\n1\nAlice\nname : Alice\npromotion : 2026",
+      "description": "Fonctions génériques avec types T et K"
+    }
+  ]
+}

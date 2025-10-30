@@ -234,7 +234,31 @@ if [ -n "$STUDENT_NAME" ]; then
   echo -e "${BLUE}🐳 Starting Docker container for $STUDENT_NAME...${NC}"
   echo ""
   
-  if run_checker_in_docker "$REPO_PATH" "$STUDENT_NAME" "$EXERCISE_ID"; then
+  # Enable verbose logging for single student mode
+  VERBOSE_ENV="-e VERBOSE=true"
+  
+  # Build docker run command with proper arguments
+  docker_args=(
+    "--rm"
+    "-v" "$PROJECT_ROOT/$REPO_PATH:/repo:z"
+    "-v" "$CONFIG_ABS:/config.json:ro,z"
+    "-v" "$LOGS_DIR:/logs:z"
+    "-v" "$RESULTS_FILE:/results.xlsx:z"
+    "-e" "REPO_DIR=/repo"
+    "-e" "EXERCISE_CONFIG=/config.json"
+    "-e" "LOG_DIR=/logs"
+    "-e" "RESULTS_FILE=/results.xlsx"
+    "-e" "STUDENT_NAME=$STUDENT_NAME"
+    "-e" "VERBOSE=true"
+  )
+  
+  if [ -n "$EXERCISE_ID" ]; then
+    docker_args+=("-e" "EXERCISE_ID=$EXERCISE_ID")
+  fi
+  
+  docker_args+=("$IMAGE_NAME")
+  
+  if docker run "${docker_args[@]}"; then
     echo ""
     echo -e "${GREEN}✅ Check complete!${NC}"
     echo -e "${CYAN}📄 Results saved to: results.xlsx${NC}"

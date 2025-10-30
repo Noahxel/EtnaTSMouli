@@ -10,7 +10,8 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
-    "validate-etna": "ts-node src/validate-etna.ts"
+    "validate-etna": "ts-node src/validate-etna.ts",
+    "manual-validate": "ts-node src/manual-validate.ts"
   },
   "keywords": [],
   "author": "",

@@ -1,6 +1,7 @@
 import { execa } from 'execa';
 import fs from 'fs-extra';
 import path from 'path';
+import { runSmartTest } from './smartTestRunner';
 
 export interface Exercise {
   id: string;
@@ -9,9 +10,16 @@ export interface Exercise {
   expectedOutput: string;
   description: string;
   errorPattern?: string;
-  testType?: 'output' | 'return';  // Added: specify test type
-  functionName?: string;            // Added: function name to test
-  testInput?: any;                  // Added: input to pass to function
+  testType?: 'output' | 'return' | 'structure';  // Added: 'structure' for code validation
+  functionName?: string;            // Added: function name to test/call
+  testInput?: any;                  // Added: input to pass to function for return testing
+  functionParams?: any[];           // Added: parameters to pass when auto-calling function
+  dynamicFields?: string[];         // Added: field names that can have dynamic values (e.g., 'id' for UUIDs)
+  requiredPatterns?: string[];      // Added: regex patterns that must exist in code (for structure tests)
+  timeout?: number;                 // Added: custom timeout for tests (e.g., async tests)
+  allowCompilationErrors?: boolean; // Added: for exercises where compilation errors are expected (e.g., ex08)
+  useStandardizedTests?: boolean;   // Added: replace student's test calls with standardized ones
+  testCode?: string;                // Added: standardized test code to use instead of student's calls
 }
 
 export interface SetupExercise {
@@ -25,7 +33,7 @@ export interface SetupExercise {
 export interface ExerciseConfig {
   day: string;
   baseDir: string;
-  setupExercise: SetupExercise;
+  setupExercise?: SetupExercise;  // Made optional - not all days have setup
   exercises: Exercise[];
 }
 
@@ -55,11 +63,30 @@ function normalizeOutput(output: string): string {
 }
 
 /**
+ * More aggressive normalization for flexible comparison
+ * - Normalizes multiple spaces to single space
+ * - Handles array spacing: [ 1, 2 ] becomes [1,2]
+ */
+function normalizeFlexible(output: string): string {
+  return output
+    .trim()
+    .replace(/\r\n/g, '\n')
+    // Normalize spaces around array brackets and commas
+    .replace(/\[\s+/g, '[')
+    .replace(/\s+\]/g, ']')
+    .replace(/\s*,\s*/g, ',')
+    // Normalize multiple spaces between words to single space
+    .replace(/\s+/g, ' ');
+}
+
+/**
  * Flexible output comparison that handles locale differences
  * - Accepts both "14.17" and "14,17" as equivalent
  * - Normalizes whitespace and newlines
+ * - Handles array spacing differences
+ * - Can ignore dynamic fields like UUIDs
  */
-function compareOutputs(expected: string, actual: string): boolean {
+function compareOutputs(expected: string, actual: string, dynamicFields?: string[]): boolean {
   const normalizedExpected = normalizeOutput(expected);
   const normalizedActual = normalizeOutput(actual);
   
@@ -74,6 +101,40 @@ function compareOutputs(expected: string, actual: string): boolean {
   
   if (expectedWithComma === normalizedActual || expectedWithPeriod === normalizedActual) {
     return true;
+  }
+  
+  // Try flexible normalization (handles spacing differences)
+  const flexExpected = normalizeFlexible(expected);
+  const flexActual = normalizeFlexible(actual);
+  
+  if (flexExpected === flexActual) {
+    return true;
+  }
+  
+  // Handle dynamic fields (e.g., UUIDs)
+  if (dynamicFields && dynamicFields.length > 0) {
+    let expectedPattern = normalizedExpected;
+    let actualPattern = normalizedActual;
+    
+    log(`🔍 Applying dynamic field matching for: ${dynamicFields.join(', ')}`);
+    
+    for (const field of dynamicFields) {
+      // Match field: 'value' pattern and replace value with wildcard
+      // Handles both single and double quotes, with or without spaces
+      const fieldPattern = new RegExp(`${field}:\\s*['"]([^'"]+)['"]`, 'gi');
+      
+      // Replace dynamic field values with a placeholder
+      expectedPattern = expectedPattern.replace(fieldPattern, `${field}: '__DYNAMIC__'`);
+      actualPattern = actualPattern.replace(fieldPattern, `${field}: '__DYNAMIC__'`);
+    }
+    
+    log(`📝 Expected pattern: ${expectedPattern.substring(0, 200)}`);
+    log(`📝 Actual pattern: ${actualPattern.substring(0, 200)}`);
+    
+    if (expectedPattern === actualPattern) {
+      log(`✅ Dynamic field matching succeeded!`);
+      return true;
+    }
   }
   
   return false;
@@ -96,14 +157,27 @@ async function findExerciseFile(
   configBaseDir: string,
   fileName: string
 ): Promise<string | null> {
-  // Possible base directories where exercises might be located
+  // Extract day-specific paths from configBaseDir
+  // e.g., "IDV-VUJS/day02/loops-and-classes" -> ["IDV-VUJS/day02/loops-and-classes", "IDV-VUJS/day02", "loops-and-classes"]
+  const basePathParts = configBaseDir.split('/').filter(p => p);
   const possibleBaseDirs = [
-    configBaseDir, // From config (e.g., "IDV-VUJS/day01/hello-typescript")
-    'IDV-VUJS/day01/hello-typescript',
-    'IDV-VUJS/day01',
-    'hello-typescript',
+    configBaseDir, // From config (e.g., "IDV-VUJS/day02/loops-and-classes")
     '.' // Root of repo
   ];
+  
+  // Add parent directories of configBaseDir
+  if (basePathParts.length > 1) {
+    // e.g., "IDV-VUJS/day02"
+    possibleBaseDirs.push(basePathParts.slice(0, -1).join('/'));
+  }
+  if (basePathParts.length > 2) {
+    // e.g., "IDV-VUJS"
+    possibleBaseDirs.push(basePathParts.slice(0, -2).join('/'));
+  }
+  // Add last part as standalone directory
+  if (basePathParts.length > 0) {
+    possibleBaseDirs.push(basePathParts[basePathParts.length - 1]);
+  }
   
   // Remove duplicates and empty strings
   const uniqueBaseDirs = [...new Set(possibleBaseDirs.filter(d => d))];
@@ -257,6 +331,95 @@ export async function checkExercise(
   }
   
   log(`✅ File exists: ${exercise.file}`);
+  
+  // Handle structure validation (checking for required code patterns)
+  if (exercise.testType === 'structure' && exercise.requiredPatterns) {
+    try {
+      log(`🔍 Validating code structure with ${exercise.requiredPatterns.length} required patterns...`);
+      
+      const fileContent = await fs.readFile(filePath, 'utf8');
+      const missingPatterns: string[] = [];
+      
+      for (const pattern of exercise.requiredPatterns) {
+        const regex = new RegExp(pattern, 'i'); // case-insensitive
+        if (!regex.test(fileContent)) {
+          missingPatterns.push(pattern);
+          log(`❌ Missing pattern: ${pattern}`);
+        } else {
+          log(`✅ Found pattern: ${pattern}`);
+        }
+      }
+      
+      if (missingPatterns.length === 0) {
+        log('✅ All required patterns found');
+        
+        // Try to compile the file to ensure it's valid TypeScript
+        // (unless compilation errors are explicitly allowed)
+        if (exercise.allowCompilationErrors) {
+          log('⚠️ Compilation errors are allowed for this exercise');
+          return {
+            id: exercise.id,
+            name: exercise.name,
+            passed: true,
+            fileExists: true,
+            outputMatch: true,
+            actualOutput: 'Code structure validated successfully (compilation errors allowed)'
+          };
+        }
+        
+        const tscPath = path.join(projectRoot, 'node_modules', '.bin', 'tsc');
+        try {
+          await execa(tscPath, ['--noEmit', filePath], {
+            cwd: projectRoot,
+            timeout: 10000
+          });
+          log('✅ File compiles successfully');
+          
+          return {
+            id: exercise.id,
+            name: exercise.name,
+            passed: true,
+            fileExists: true,
+            outputMatch: true,
+            actualOutput: 'Code structure validated successfully'
+          };
+        } catch (compileErr: any) {
+          log('❌ File has compilation errors');
+          return {
+            id: exercise.id,
+            name: exercise.name,
+            passed: false,
+            fileExists: true,
+            outputMatch: false,
+            error: 'Code structure correct but compilation failed',
+            errorDetails: compileErr.stderr || compileErr.stdout || ''
+          };
+        }
+      } else {
+        log(`❌ Missing ${missingPatterns.length} required pattern(s)`);
+        return {
+          id: exercise.id,
+          name: exercise.name,
+          passed: false,
+          fileExists: true,
+          outputMatch: false,
+          error: `Missing required code patterns: ${missingPatterns.join(', ')}`,
+          expectedOutput: exercise.requiredPatterns.join('\n'),
+          actualOutput: `Missing: ${missingPatterns.join(', ')}`
+        };
+      }
+    } catch (err: any) {
+      log('❌ Structure validation failed:', err.message);
+      return {
+        id: exercise.id,
+        name: exercise.name,
+        passed: false,
+        fileExists: true,
+        outputMatch: false,
+        error: `Structure validation error: ${err.message}`
+      };
+    }
+  }
   
   // Handle compile error exercises (ex17)
   if (exercise.expectedOutput === 'compile_error') {
@@ -413,7 +576,7 @@ export async function checkExercise(
         const actualOutput = normalizeOutput(result.stdout);
         const expectedOutput = normalizeOutput(exercise.expectedOutput);
         
-        const outputMatch = compareOutputs(exercise.expectedOutput, result.stdout);
+        const outputMatch = compareOutputs(exercise.expectedOutput, result.stdout, exercise.dynamicFields);
         
         if (outputMatch) {
           log(`✅ Return value matches expected: ${expectedOutput}`);
@@ -463,67 +626,33 @@ export async function checkExercise(
     }
   }
   
-  // Run the TypeScript file using project's ts-node (regular output testing)
+  // Run the TypeScript file using smart test runner (handles console.error, flexible matching)
   try {
-    const tsNodePath = path.join(projectRoot, 'node_modules', '.bin', 'ts-node');
-    const fileDir = path.dirname(filePath);
+    log(`🚀 Running smart test for exercise ${exercise.id}`);
     
-    // Create a temporary minimal tsconfig.json in the repo directory
-    const tempTsConfig = path.join(fileDir, 'tsconfig.json');
-    const needsCleanup = !(await fileExists(tempTsConfig));
+    // Use smart test runner for better handling of student code variations
+    const testResult = await runSmartTest(repoDir, filePath, exercise, projectRoot);
     
-    if (needsCleanup) {
-      await fs.writeJSON(tempTsConfig, {
-        compilerOptions: {
-          module: 'commonjs',
-          target: 'ES2020',
-          esModuleInterop: true
-        }
-      });
+    if (testResult.passed) {
+      log('✅ Test passed with smart runner');
+    } else {
+      log('❌ Test failed');
+      if (testResult.error) {
+        log('Error:', testResult.error);
+      }
     }
     
-    try {
-      const result = await execa(tsNodePath, [
-        '--transpileOnly',
-        path.basename(filePath)
-      ], {
-        cwd: fileDir,
-        timeout: 10000
-      });
-      
-      // Clean up temp tsconfig if we created it
-      if (needsCleanup) {
-        await fs.remove(tempTsConfig);
-      }
-      
-      const actualOutput = normalizeOutput(result.stdout);
-      const expectedOutput = normalizeOutput(exercise.expectedOutput);
-      const outputMatch = compareOutputs(exercise.expectedOutput, result.stdout);
-      
-      if (outputMatch) {
-        log('✅ Output matches expected');
-      } else {
-        log('❌ Output mismatch');
-        log('Expected:', JSON.stringify(expectedOutput));
-        log('Got:', JSON.stringify(actualOutput));
-      }
-      
-      return {
-        id: exercise.id,
-        name: exercise.name,
-        passed: outputMatch,
-        fileExists: true,
-        outputMatch,
-        expectedOutput,
-        actualOutput
-      };
-    } catch (execError) {
-      // Clean up temp tsconfig if we created it
-      if (needsCleanup) {
-        await fs.remove(tempTsConfig).catch(() => {});
-      }
-      throw execError;
-    }
+    return {
+      id: exercise.id,
+      name: exercise.name,
+      passed: testResult.passed,
+      fileExists: true,
+      outputMatch: testResult.passed,
+      expectedOutput: exercise.expectedOutput,
+      actualOutput: testResult.actualOutput,
+      error: testResult.error,
+      errorDetails: testResult.errorDetails
+    };
   } catch (err: any) {
     log('❌ Execution failed:', err.message);
     return {
@@ -571,8 +700,8 @@ export async function runExerciseChecks(
     log(`Filtering for exercise ID: ${exerciseIdFilter}`);
   }
   
-  // Check setup exercise first (if not filtering or if filter matches)
-  if (!exerciseIdFilter || exerciseIdFilter === config.setupExercise.id) {
+  // Check setup exercise first (if it exists and not filtering or if filter matches)
+  if (config.setupExercise && (!exerciseIdFilter || exerciseIdFilter === config.setupExercise.id)) {
     try {
       const setupResult = await checkSetupExercise(repoDir, config.setupExercise, projectRoot, config.baseDir);
       results.push(setupResult);
@@ -623,8 +752,22 @@ export async function runExerciseChecks(
   results.forEach(r => {
     const icon = r.passed ? '✅' : '❌';
     logAlways(`${icon} Ex${r.id}: ${r.name}`);
-    if (!r.passed && r.error) {
-      logAlways(`   └─ ${r.error}`);
+    if (!r.passed) {
+      if (!r.fileExists) {
+        logAlways(`   └─ File not found: ${config.exercises.find(e => e.id === r.id)?.file || 'unknown'}`);
+      } else if (r.error) {
+        logAlways(`   └─ ${r.error}`);
+        // Show error details if verbose mode
+        if (VERBOSE && r.errorDetails) {
+          logAlways(`   └─ Details: ${r.errorDetails}`);
+        }
+      } else if (!r.outputMatch) {
+        logAlways(`   └─ Output mismatch`);
+        if (VERBOSE) {
+          logAlways(`   └─ Expected: ${r.expectedOutput || '(empty)'}`);
+          logAlways(`   └─ Got: ${r.actualOutput || '(empty)'}`);
+        }
+      }
     }
   });
   

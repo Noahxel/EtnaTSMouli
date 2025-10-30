@@ -1,8 +1,10 @@
 {
-  "moduleId": 10188,
-  "activityId": 54309,
   "authenticator": "eyJpZGVudGl0eSI6ICJleUpzYjJkcGJpSTZJQ0pzWlhabGRtVmZiaUlzSUNKcFpDSTZJREV3TURRNU5Td2dJbWR5YjNWd2N5STZJRnNpY0hKdlppSmRMQ0FpWlcxaGFXd2lPaUFpYkdWMlpYWmxYMjVBWlhSdVlTMWhiSFJsY201aGJtTmxMbTVsZENJc0lDSnNiMmRwYmw5a1lYUmxJam9nSWpJd01qVXRNVEF0TWpnZ01EZzZNelk2TVRnaUxDQWliRzluWVhNaU9pQm1ZV3h6WlgwPSIsICJzaWduYXR1cmUiOiAid2lnRElYb2lsYWp4VHNqUjVieUhUZEhBM3U1c055TlE1U0NSTkVmcmFyWWoxTzNWTFJBUjI0NVVoY0JTcm9CVnNrTjFjTTdVelArWWZIN2pmUGdibkdDN2R2NThieldHUUFNQ3NNRFMxR2ZqQWhnS2I1K0s1a2hvSEUrSzZyOGNQVjlvcXdSOEFsS2x2STFxKzVTcEphWDAvSmRBK0xlVmNhbUxUbWdMMlB1REg3bzBmZHQ0M1l4TEZkWmcrTDhDQ1BpekNlOGRscEt5MnJuZUVjeVgrTThxVE5XWFl4YnhHSk9UMlRlYStZRnFhU3ZYbmJRZ3ZQZmR6eTJVY1hsTk1RZmFNbXVrRXY2eklDYXRyVWtyWkhZdjNNVnAxZTVIMnFMbzMvaXJFcFFCWkRTK01vWURWZkpDSEJpbFM0ZlBuMENpU2c0eXJjamtWRFNVcUVPUnBKU3lva2RGSWovMWEyNWRHUTZCSDcrTTNFVDNSelRmanJraWZqOEt6M3hUTHBLYi9tWVY0MUV6a0tSYUU3RmR2OXlKNy9WQ1F3Znc3L21sem1iZjFGR24rY1d3WmdXSktuWFkvelgrQWdTT1lhS1NtbWZTUTNXOG9ZSjRud3R0LytPWFZwZTJ6ekxVRVo2ZG9sMHpZNXpleUVVL1UzYUwzVVgwZnNPdXlEZDVuSWV3Nmc0TmRheVJ4OURaSDFJZDBXVmJFSjlUZUlXc2lDUVlqeUM2V3ptQmpJS0pYeENGczhDL0d1NHBjSzFXK3JJRkdSMytKclU4TW13NUl5TDRJUzFQOWNDMEIwVW5ZbXhESks2VHRxZ1RyY3A4OTJ6c1FSTHI2VXo3K3FJT3o3VGp2WS96bHQ3RFRZWjA3MHF4OVNjb2E0RWQyUU1qTW1QVkZveU1PcFU9In0",
-  "exerciseMapping": {
+  "days": {
+    "day01": {
+      "moduleId": 10188,
+      "activityId": 54309,
+      "exerciseMapping": {
     "10": {
       "stageName": "Exercice 010",
       "stageNumber": "010"
@@ -84,8 +86,182 @@
       "stageNumber": "008"
     },
     "09": {
-      "stageName": "Exercice 009",
-      "stageNumber": "009"
+        "stageName": "Exercice 009",
+        "stageNumber": "009"
+      }
+    }
+  },
+  "day02": {
+    "moduleId": 10188,
+    "activityId": 54335,
+    "exerciseMapping": {
+      "01": {
+        "stageName": "Exercice 001",
+        "stageNumber": "001"
+      },
+      "02": {
+        "stageName": "Exercice 002",
+        "stageNumber": "002"
+      },
+      "03": {
+        "stageName": "Exercice 003",
+        "stageNumber": "003"
+      },
+      "04": {
+        "stageName": "Exercice 004",
+        "stageNumber": "004"
+      },
+      "05": {
+        "stageName": "Exercice 005",
+        "stageNumber": "005"
+      },
+      "06": {
+        "stageName": "Exercice 006",
+        "stageNumber": "006"
+      },
+      "07": {
+        "stageName": "Exercice 007",
+        "stageNumber": "007"
+      },
+      "08": {
+        "stageName": "Exercice 008",
+        "stageNumber": "008"
+      },
+      "09": {
+        "stageName": "Exercice 009",
+        "stageNumber": "009"
+      },
+      "10": {
+        "stageName": "Exercice 010",
+        "stageNumber": "010"
+      },
+      "11": {
+        "stageName": "Exercice 011",
+        "stageNumber": "011"
+      },
+      "12": {
+        "stageName": "Exercice 012",
+        "stageNumber": "012"
+      },
+      "13": {
+        "stageName": "Exercice 013",
+        "stageNumber": "013"
+      },
+      "14": {
+        "stageName": "Exercice 014",
+        "stageNumber": "014"
+      },
+      "15": {
+        "stageName": "Exercice 015",
+        "stageNumber": "015"
+      },
+      "16": {
+        "stageName": "Exercice 016",
+        "stageNumber": "016"
+      },
+      "17": {
+        "stageName": "Exercice 017",
+        "stageNumber": "017"
+      },
+      "18": {
+        "stageName": "Exercice 018",
+        "stageNumber": "018"
+      },
+      "19": {
+        "stageName": "Exercice 019",
+        "stageNumber": "019"
+      },
+      "20": {
+        "stageName": "Exercice 020",
+        "stageNumber": "020"
+      }
+    }
+  },
+  "day03": {
+    "moduleId": 10188,
+    "activityId": 54336,
+    "exerciseMapping": {
+      "01": {
+        "stageName": "Exercice 001",
+        "stageNumber": "001"
+      },
+      "02": {
+        "stageName": "Exercice 002",
+        "stageNumber": "002"
+      },
+      "03": {
+        "stageName": "Exercice 003",
+        "stageNumber": "003"
+      },
+      "04": {
+        "stageName": "Exercice 004",
+        "stageNumber": "004"
+      },
+      "05": {
+        "stageName": "Exercice 005",
+        "stageNumber": "005"
+      },
+      "06": {
+        "stageName": "Exercice 006",
+        "stageNumber": "006"
+      },
+      "07": {
+        "stageName": "Exercice 007",
+        "stageNumber": "007"
+      },
+      "08": {
+        "stageName": "Exercice 008",
+        "stageNumber": "008"
+      },
+      "09": {
+        "stageName": "Exercice 009",
+        "stageNumber": "009"
+      },
+      "10": {
+        "stageName": "Exercice 010",
+        "stageNumber": "010"
+      },
+      "11": {
+        "stageName": "Exercice 011",
+        "stageNumber": "011"
+      },
+      "12": {
+        "stageName": "Exercice 012",
+        "stageNumber": "012"
+      },
+      "13": {
+        "stageName": "Exercice 013",
+        "stageNumber": "013"
+      },
+      "14": {
+        "stageName": "Exercice 014",
+        "stageNumber": "014"
+      },
+      "15": {
+        "stageName": "Exercice 015",
+        "stageNumber": "015"
+      },
+      "16": {
+        "stageName": "Exercice 016",
+        "stageNumber": "016"
+      },
+      "17": {
+        "stageName": "Exercice 017",
+        "stageNumber": "017"
+      },
+      "18": {
+        "stageName": "Exercice 018",
+        "stageNumber": "018"
+      },
+      "19": {
+        "stageName": "Exercice 019",
+        "stageNumber": "019"
+      },
+      "20": {
+        "stageName": "Exercice 020",
+        "stageNumber": "020"
+      }
     }
   }
+}
 }

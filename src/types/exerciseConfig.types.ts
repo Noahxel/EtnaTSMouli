@@ -28,6 +28,41 @@ export interface Exercise {
    * The error message must contain this substring
    */
   errorPattern?: string;
+  
+  /**
+   * Optional function name to call if not already invoked
+   * The checker will automatically call this function with params if needed
+   */
+  functionName?: string;
+  
+  /**
+   * Optional parameters to pass when calling the function
+   * Array of parameters in the order they should be passed
+   */
+  functionParams?: any[];
+  
+  /**
+   * Test type: 'output' (default) for console.log testing, 'return' for return value testing
+   * 'structure' for code structure validation (checks for required patterns)
+   */
+  testType?: 'output' | 'return' | 'structure';
+  
+  /**
+   * Input for return value testing (for functions that return instead of print)
+   */
+  testInput?: any;
+  
+  /**
+   * Field names that can have dynamic values (e.g., 'id' for UUIDs)
+   * The checker will ignore differences in these field values
+   */
+  dynamicFields?: string[];
+  
+  /**
+   * Required regex patterns for structure validation
+   * Each pattern must be found in the code for the exercise to pass
+   */
+  requiredPatterns?: string[];
 }
 
 export interface SetupExercise {

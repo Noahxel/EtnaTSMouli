@@ -1,4 +1,4 @@
 npm run build
-./clone-students.sh 1 1
-./docker-test.sh -d day01 --all
-npm run validate-etna -- --send 
+./clone-students.sh 2 2
+./docker-test.sh -d day02 --all
+npm run validate-etna -- -d day02 --send

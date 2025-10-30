@@ -6,15 +6,21 @@ interface ValidationPayload {
   content: string;
 }
 
-interface EtnaConfig {
+interface DayConfig {
   moduleId: number;
   activityId: number;
-  authenticator: string;
   exerciseMapping: {
     [exerciseId: string]: {
       stageName: string;
       stageNumber: string;
     };
+  };
+}
+
+interface EtnaConfig {
+  authenticator: string;
+  days: {
+    [day: string]: DayConfig;
   };
 }
 
@@ -49,31 +55,61 @@ export class EtnaValidator {
   
   private createConfigTemplate(configPath: string): void {
     const template = {
-      moduleId: 10188,
-      activityId: 54335,
       authenticator: "YOUR_AUTHENTICATOR_COOKIE_HERE",
-      exerciseMapping: {
-        "00": { stageName: "Exercice ", stageNumber: "000" },
-        "01": { stageName: "Exercice ", stageNumber: "001" },
-        "02": { stageName: "Exercice ", stageNumber: "002" },
-        "03": { stageName: "Exercice ", stageNumber: "003" },
-        "04": { stageName: "Exercice ", stageNumber: "004" },
-        "05": { stageName: "Exercice ", stageNumber: "005" },
-        "06": { stageName: "Exercice ", stageNumber: "006" },
-        "07": { stageName: "Exercice ", stageNumber: "007" },
-        "08": { stageName: "Exercice ", stageNumber: "008" },
-        "09": { stageName: "Exercice ", stageNumber: "009" },
-        "10": { stageName: "Exercice ", stageNumber: "010" },
-        "11": { stageName: "Exercice ", stageNumber: "011" },
-        "12": { stageName: "Exercice ", stageNumber: "012" },
-        "13": { stageName: "Exercice ", stageNumber: "013" },
-        "14": { stageName: "Exercice ", stageNumber: "014" },
-        "15": { stageName: "Exercice ", stageNumber: "015" },
-        "16": { stageName: "Exercice ", stageNumber: "016" },
-        "17": { stageName: "Exercice ", stageNumber: "017" },
-        "18": { stageName: "Exercice ", stageNumber: "018" },
-        "19": { stageName: "Exercice ", stageNumber: "019" },
-        "20": { stageName: "Exercice ", stageNumber: "020" }
+      days: {
+        day01: {
+          moduleId: 10188,
+          activityId: 54309,
+          exerciseMapping: {
+            "00": { stageName: "Exercice ", stageNumber: "000" },
+            "01": { stageName: "Exercice ", stageNumber: "001" },
+            "02": { stageName: "Exercice ", stageNumber: "002" },
+            "03": { stageName: "Exercice ", stageNumber: "003" },
+            "04": { stageName: "Exercice ", stageNumber: "004" },
+            "05": { stageName: "Exercice ", stageNumber: "005" },
+            "06": { stageName: "Exercice ", stageNumber: "006" },
+            "07": { stageName: "Exercice ", stageNumber: "007" },
+            "08": { stageName: "Exercice ", stageNumber: "008" },
+            "09": { stageName: "Exercice ", stageNumber: "009" },
+            "10": { stageName: "Exercice ", stageNumber: "010" },
+            "11": { stageName: "Exercice ", stageNumber: "011" },
+            "12": { stageName: "Exercice ", stageNumber: "012" },
+            "13": { stageName: "Exercice ", stageNumber: "013" },
+            "14": { stageName: "Exercice ", stageNumber: "014" },
+            "15": { stageName: "Exercice ", stageNumber: "015" },
+            "16": { stageName: "Exercice ", stageNumber: "016" },
+            "17": { stageName: "Exercice ", stageNumber: "017" },
+            "18": { stageName: "Exercice ", stageNumber: "018" },
+            "19": { stageName: "Exercice ", stageNumber: "019" },
+            "20": { stageName: "Exercice ", stageNumber: "020" }
+          }
+        },
+        day02: {
+          moduleId: 10188,
+          activityId: 54335,
+          exerciseMapping: {
+            "01": { stageName: "Exercice ", stageNumber: "001" },
+            "02": { stageName: "Exercice ", stageNumber: "002" },
+            "03": { stageName: "Exercice ", stageNumber: "003" },
+            "04": { stageName: "Exercice ", stageNumber: "004" },
+            "05": { stageName: "Exercice ", stageNumber: "005" },
+            "06": { stageName: "Exercice ", stageNumber: "006" },
+            "07": { stageName: "Exercice ", stageNumber: "007" },
+            "08": { stageName: "Exercice ", stageNumber: "008" },
+            "09": { stageName: "Exercice ", stageNumber: "009" },
+            "10": { stageName: "Exercice ", stageNumber: "010" },
+            "11": { stageName: "Exercice ", stageNumber: "011" },
+            "12": { stageName: "Exercice ", stageNumber: "012" },
+            "13": { stageName: "Exercice ", stageNumber: "013" },
+            "14": { stageName: "Exercice ", stageNumber: "014" },
+            "15": { stageName: "Exercice ", stageNumber: "015" },
+            "16": { stageName: "Exercice ", stageNumber: "016" },
+            "17": { stageName: "Exercice ", stageNumber: "017" },
+            "18": { stageName: "Exercice ", stageNumber: "018" },
+            "19": { stageName: "Exercice ", stageNumber: "019" },
+            "20": { stageName: "Exercice ", stageNumber: "020" }
+          }
+        }
       }
     };
     
@@ -81,7 +117,7 @@ export class EtnaValidator {
     console.log(`✅ Template created at ${configPath}`);
     console.log('📝 Please update:');
     console.log('   - authenticator: Your ETNA cookie');
-    console.log('   - moduleId & activityId: From ETNA URL');
+    console.log('   - moduleId & activityId for each day: From ETNA URL');
     console.log('   - GroupIDs are automatically read from Excel (column 24)');
   }
   
@@ -178,17 +214,23 @@ export class EtnaValidator {
   }
   
   async sendValidation(
+    day: string,
     groupId: number,
     exerciseId: string,
     payload: ValidationPayload
   ): Promise<any> {
-    const exerciseInfo = this.config.exerciseMapping[exerciseId];
+    const dayConfig = this.config.days[day];
+    if (!dayConfig) {
+      throw new Error(`No configuration found for ${day}`);
+    }
+    
+    const exerciseInfo = dayConfig.exerciseMapping[exerciseId];
     if (!exerciseInfo) {
-      throw new Error(`No mapping found for exercise ${exerciseId}`);
+      throw new Error(`No mapping found for exercise ${exerciseId} in ${day}`);
     }
     
     const encodedStage = encodeURIComponent(exerciseInfo.stageName);
-    const url = `https://modules-api.etna-alternance.net/${this.config.moduleId}/activities/${this.config.activityId}/group/${groupId}/stages/${encodedStage}/validation`;
+    const url = `https://modules-api.etna-alternance.net/${dayConfig.moduleId}/activities/${dayConfig.activityId}/group/${groupId}/stages/${encodedStage}/validation`;
     
     const headers = {
       "Accept": "application/json, text/plain, */*",
@@ -217,11 +259,32 @@ export class EtnaValidator {
     day: string = 'day01',
     studentId?: string,
     dryRun: boolean = true,
-    parallelJobs: number = 16
+    parallelJobs: number = 16,
+    exerciseId?: string,
+    manualStatus?: 'VALID' | 'ERROR'
   ): Promise<void> {
     console.log('📊 Reading Excel file for validations...\n');
     
-    const validations = await this.readExcelValidations(day, studentId);
+    let validations = await this.readExcelValidations(day, studentId);
+    
+    // Filter by exercise if specified
+    if (exerciseId) {
+      validations = validations.filter(v => v.exerciseId === exerciseId);
+      if (validations.length === 0) {
+        console.log(`⚠️  No validations found for exercise ${exerciseId}`);
+        return;
+      }
+    }
+    
+    // Override status if manual status is provided
+    if (manualStatus) {
+      console.log(`🔧 Manual status override: ${manualStatus}\n`);
+      validations = validations.map(v => ({
+        ...v,
+        status: manualStatus === 'VALID' ? 'VALID' : 'ERROR',
+        errorMessage: manualStatus === 'VALID' ? undefined : (v.errorMessage || 'Manually denied')
+      }));
+    }
     
     if (validations.length === 0) {
       console.log('✅ No validations found!');
@@ -277,7 +340,7 @@ export class EtnaValidator {
                 content: "\n" + (validation.errorMessage?.replace(" | ", "  |  ") || "Exercise failed validation")
               };
           
-          await this.sendValidation(validation.groupId, validation.exerciseId, payload);
+          await this.sendValidation(day, validation.groupId, validation.exerciseId, payload);
           
           const statusIcon = validation.status === 'VALID' ? '✅' : '❌';
           const statusText = validation.status === 'VALID' ? 'Validated' : 'Denied';
