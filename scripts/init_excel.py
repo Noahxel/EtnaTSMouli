@@ -105,7 +105,9 @@ def create_excel_structure(day, students, student_groups, config):
         student_groups (dict): Mapping of student name to groupId
         config (dict): Exercise configuration
     """
-    excel_file = './results.xlsx'
+    excel_dir = './results'
+    os.makedirs(excel_dir, exist_ok=True)
+    excel_file = os.path.join(excel_dir, 'results.xlsx')
     
     # Load existing workbook or create new one
     if os.path.exists(excel_file):

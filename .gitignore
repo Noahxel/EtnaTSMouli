@@ -40,6 +40,9 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+results/
+package-lock.json
+test-repos/day*/clone_log.txt
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/

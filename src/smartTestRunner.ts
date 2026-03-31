@@ -140,74 +140,105 @@ async function ensureProjectSetup(repoDir: string, projectRoot: string): Promise
 
 /**
  * Remove student's test code from the file
- * Looks for try-catch blocks and function calls at the end of the file
+ * Simple approach: remove everything that's not a definition (type/interface/function/class)
  */
 function removeStudentTests(code: string): string {
   const lines = code.split('\n');
+  const resultLines: string[] = [];
   
-  // Find where function/interface definitions end
-  // Everything after that is likely test code
-  let lastDefinitionLine = -1;
   let braceDepth = 0;
   let inMultilineComment = false;
-  let inDefinition = false; // Track if we're inside a definition
+  let inDefinition = false;
+  let inTestBlock = false; // Track if we're inside a test block (try/for/while/etc)
+  let testBlockStartDepth = 0;
   
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+    const line = lines[i];
+    const trimmed = line.trim();
     
-    // Handle multi-line comments
-    if (line.includes('/*')) inMultilineComment = true;
-    if (line.includes('*/')) {
-      inMultilineComment = false;
+    // Handle multi-line comments - keep them
+    if (trimmed.includes('/*') && !trimmed.includes('*/')) {
+      inMultilineComment = true;
+      resultLines.push(line);
       continue;
     }
-    if (inMultilineComment || line.startsWith('//')) continue;
+    if (inMultilineComment) {
+      resultLines.push(line);
+      if (trimmed.includes('*/')) {
+        inMultilineComment = false;
+      }
+      continue;
+    }
     
-    // Count braces to track nesting
-    braceDepth += (line.match(/\{/g) || []).length;
-    braceDepth -= (line.match(/\}/g) || []).length;
+    // Keep single-line comments
+    if (trimmed.startsWith('//')) {
+      resultLines.push(line);
+      continue;
+    }
     
-    // If we see a function/class/interface/type/enum definition (NOT variable declarations)
-    if (/^(function|async function|class|interface|type|enum)\s+\w+/.test(line) ||
-        /^(const|let|var)\s+\w+\s*=\s*\(.*\)\s*(:\s*\w+\s*)?=>/.test(line)) { // Arrow functions with optional return type
-      lastDefinitionLine = i;
+    // Keep empty lines
+    if (trimmed === '') {
+      resultLines.push(line);
+      continue;
+    }
+    
+    // Update brace depth
+    const openBraces = (trimmed.match(/\{/g) || []).length;
+    const closeBraces = (trimmed.match(/\}/g) || []).length;
+    const prevDepth = braceDepth;
+    braceDepth += openBraces - closeBraces;
+    
+    // If we're in a test block, skip until we exit it
+    if (inTestBlock) {
+      if (braceDepth <= testBlockStartDepth && closeBraces > 0) {
+        inTestBlock = false;
+      }
+      continue;
+    }
+    
+    // Check if this is a definition line (function/class/interface/type/enum)
+    const isDefinition = /^(function|async function|class|interface|type|enum)\s+\w+/.test(trimmed) ||
+                        /^(const|let|var)\s+\w+\s*=\s*\(.*\)\s*(:\s*\w+\s*)?=>/.test(trimmed) ||
+                        /^(export\s+)?(function|class|interface|type|enum)\s+\w+/.test(trimmed) ||
+                        /^type\s+\w+\s*=/.test(trimmed);
+    
+    if (isDefinition) {
       inDefinition = true;
+      resultLines.push(line);
+      continue;
     }
     
-    // If we're at zero brace depth and were in a definition, we're done with it
-    if (braceDepth === 0 && /\}/.test(line) && inDefinition) {
-      lastDefinitionLine = i;
-      inDefinition = false;
+    // If we're inside a definition, keep lines
+    if (inDefinition) {
+      resultLines.push(line);
+      // Check if we've exited the definition (back to depth 0 and we see a closing brace)
+      if (braceDepth === 0 && closeBraces > 0) {
+        inDefinition = false;
+      }
+      continue;
     }
+    
+    // At top level, check if this is test code
+    const normalizedLine = trimmed.replace(/\s+/g, ' ');
+    // Match: try/catch, variable declarations, loops, if statements, function calls, assignments
+    const looksLikeTestCode = /^(try|catch|const|let|var|for\s*\(|while\s*\(|if\s*\(|\w+\s*=|[\w.]+\s*\()/.test(normalizedLine);
+    
+    if (looksLikeTestCode) {
+      // This is test code
+      log(`Removing test code at line ${i + 1}: ${normalizedLine.substring(0, 60)}`);
+      if (openBraces > closeBraces) {
+        // Multi-line test block
+        inTestBlock = true;
+        testBlockStartDepth = prevDepth;
+      }
+      continue;
+    }
+    
+    // Otherwise keep the line
+    resultLines.push(line);
   }
   
-  // If we found definitions, remove everything after them (with some buffer)
-  if (lastDefinitionLine > -1) {
-    // Keep a few blank lines after the last definition
-    let cutoffLine = lastDefinitionLine + 1;
-    
-    // Skip blank lines and comments immediately after
-    while (cutoffLine < lines.length) {
-      const trimmed = lines[cutoffLine].trim();
-      if (trimmed === '' || trimmed.startsWith('//') || trimmed.startsWith('/*')) {
-        cutoffLine++;
-      } else {
-        break;
-      }
-    }
-    
-    // If the next non-blank line looks like test code, cut here
-    if (cutoffLine < lines.length) {
-      const nextLine = lines[cutoffLine].trim();
-      // Check for try-catch blocks, direct function calls (including method calls), variable declarations, loops, etc.
-      if (/^(try|catch|const|let|var|for\s*\(|while\s*\(|if\s*\(|async\s+function|[\w.]+\s*\()/.test(nextLine)) {
-        log(`Removing test code starting at line ${cutoffLine + 1}: ${nextLine.substring(0, 60)}`);
-        return lines.slice(0, cutoffLine).join('\n');
-      }
-    }
-  }
-  
-  return code;
+  return resultLines.join('\n');
 }
 
 /**
@@ -300,9 +331,12 @@ export async function runSmartTest(
     try {
       // Run the test
       const tsNodePath = path.join(projectRoot, 'node_modules', '.bin', 'ts-node');
+      const typescriptPath = path.join(projectRoot, 'node_modules', 'typescript');
       const result = await execa(tsNodePath, [
         '--transpileOnly',
         '--skip-project',
+        '--prefer-ts-exts',
+        '--compiler', typescriptPath,
         '--compiler-options', JSON.stringify({
           module: 'commonjs',
           target: 'ES2020',
@@ -313,7 +347,12 @@ export async function runSmartTest(
       ], {
         cwd: path.dirname(wrapperPath),
         timeout: exercise.timeout || 10000,
-        reject: false // Don't throw on non-zero exit
+        reject: false, // Don't throw on non-zero exit
+        env: {
+          ...process.env,
+          TS_NODE_PROJECT: 'false', // Don't look for tsconfig in student repo
+          TS_NODE_SKIP_PROJECT: 'true' // Skip tsconfig.json resolution
+        }
       });
       
       // Cleanup

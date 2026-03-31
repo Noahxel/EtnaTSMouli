@@ -113,10 +113,12 @@ fi
 PROJECT_ROOT=$(pwd)
 CONFIG_ABS="$PROJECT_ROOT/$CONFIG_PATH"
 LOGS_DIR="$PROJECT_ROOT/logs"
-RESULTS_FILE="$PROJECT_ROOT/results.xlsx"
+RESULTS_DIR="$PROJECT_ROOT/results"
+RESULTS_FILE="$RESULTS_DIR/results.xlsx"
 
-# Create logs directory if it doesn't exist
+# Create logs and results directories if they don't exist
 mkdir -p "$LOGS_DIR"
+mkdir -p "$RESULTS_DIR"
 
 # Create empty results file if it doesn't exist
 if [ ! -f "$RESULTS_FILE" ]; then
@@ -132,17 +134,21 @@ run_checker_in_docker() {
   local student_abs="$PROJECT_ROOT/$student_dir"
   
   # Build docker run command with proper arguments
+  # Look up GroupID for this student
+  local group_id="${STUDENT_GROUP_IDS[$student_name]:-}"
+  
   local docker_args=(
     "--rm"
     "-v" "$student_abs:/repo:z"
     "-v" "$CONFIG_ABS:/config.json:ro,z"
     "-v" "$LOGS_DIR:/logs:z"
-    "-v" "$RESULTS_FILE:/results.xlsx:z"
+    "-v" "$RESULTS_DIR:/results:z"
     "-e" "REPO_DIR=/repo"
     "-e" "EXERCISE_CONFIG=/config.json"
     "-e" "LOG_DIR=/logs"
-    "-e" "RESULTS_FILE=/results.xlsx"
+    "-e" "RESULTS_FILE=/results/results.xlsx"
     "-e" "STUDENT_NAME=$student_name"
+    "-e" "GROUP_ID=$group_id"
   )
   
   if [ -n "$exercise_id" ]; then
@@ -156,10 +162,31 @@ run_checker_in_docker() {
   return $?
 }
 
+# Parse clone log to extract GroupIDs
+declare -A STUDENT_GROUP_IDS
+CLONE_LOG="./test-repos/${DAY}/clone_log.txt"
+if [ -f "$CLONE_LOG" ]; then
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^[[:space:]]*Student:[[:space:]]*(.+)$ ]]; then
+      _student="${BASH_REMATCH[1]}"
+    fi
+    if [[ "$line" =~ ^[[:space:]]*GroupID:[[:space:]]*([0-9]+)$ ]]; then
+      _groupid="${BASH_REMATCH[1]}"
+      if [ -n "$_student" ]; then
+        STUDENT_GROUP_IDS["$_student"]="$_groupid"
+      fi
+    fi
+  done < "$CLONE_LOG"
+  echo -e "${GREEN}✅ Loaded ${#STUDENT_GROUP_IDS[@]} GroupIDs from clone log${NC}"
+fi
+
 # All students mode
 if [ "$CHECK_ALL_STUDENTS" = true ]; then
   echo -e "${GREEN}📚 Checking all students in ${DAY} (sequential mode)...${NC}"
   echo ""
+  
+  # Remove stale results file to start fresh
+  rm -f "$RESULTS_FILE"
   
   REPOS_DIR="./test-repos/${DAY}/repos"
   
@@ -234,8 +261,8 @@ if [ -n "$STUDENT_NAME" ]; then
   echo -e "${BLUE}🐳 Starting Docker container for $STUDENT_NAME...${NC}"
   echo ""
   
-  # Enable verbose logging for single student mode
-  VERBOSE_ENV="-e VERBOSE=true"
+  # Look up GroupID for this student
+  local single_group_id="${STUDENT_GROUP_IDS[$STUDENT_NAME]:-}"
   
   # Build docker run command with proper arguments
   docker_args=(
@@ -243,12 +270,13 @@ if [ -n "$STUDENT_NAME" ]; then
     "-v" "$PROJECT_ROOT/$REPO_PATH:/repo:z"
     "-v" "$CONFIG_ABS:/config.json:ro,z"
     "-v" "$LOGS_DIR:/logs:z"
-    "-v" "$RESULTS_FILE:/results.xlsx:z"
+    "-v" "$RESULTS_DIR:/results:z"
     "-e" "REPO_DIR=/repo"
     "-e" "EXERCISE_CONFIG=/config.json"
     "-e" "LOG_DIR=/logs"
-    "-e" "RESULTS_FILE=/results.xlsx"
+    "-e" "RESULTS_FILE=/results/results.xlsx"
     "-e" "STUDENT_NAME=$STUDENT_NAME"
+    "-e" "GROUP_ID=$single_group_id"
     "-e" "VERBOSE=true"
   )
   

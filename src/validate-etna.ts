@@ -63,6 +63,10 @@ async function main() {
           console.error('❌ Error: --day requires a value');
           process.exit(1);
         }
+        // Normalize: "1" -> "day01", "02" -> "day02"
+        if (/^\d+$/.test(day)) {
+          day = `day${day.padStart(2, '0')}`;
+        }
         break;
       
       case '-s':
@@ -112,7 +116,7 @@ async function main() {
   }
   
   try {
-    const validator = new EtnaValidator('./results.xlsx');
+    const validator = new EtnaValidator('./results/results.xlsx');
     await validator.validateErrors(day, studentId, !send, parallelJobs, exerciseId, manualStatus);
   } catch (err) {
     console.error('❌ Error:', err instanceof Error ? err.message : String(err));

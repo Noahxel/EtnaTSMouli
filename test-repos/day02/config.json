@@ -48,7 +48,9 @@
       "name": "displayWeatherMessage function",
       "file": "displayWeatherMessage.ts",
       "expectedOutput": "Time for a snowball fight! ❄️\nIt's a bright and sunny day! ☀️\nHold on to your hat! 💨\nLooks like it might rain later. ☁️\nUnknown weather condition.\nDon't forget your umbrella! ☔️\nStay inside, it's dangerous out there! ⛈️",
-      "description": "Enum Weather et fonction displayWeatherMessage avec switch"
+      "description": "Enum Weather et fonction displayWeatherMessage avec switch",
+      "useStandardizedTests": true,
+      "testCode": "// Standardized tests\ndisplayWeatherMessage(Weather.Snowy);\ndisplayWeatherMessage(Weather.Sunny);\ndisplayWeatherMessage(Weather.Windy);\ndisplayWeatherMessage(Weather.Cloudy);\ndisplayWeatherMessage(999 as any); // Unknown\ndisplayWeatherMessage(Weather.Rainy);\ndisplayWeatherMessage(Weather.Stormy);"
     },
     {
       "id": "07",
@@ -104,8 +106,10 @@
       "id": "11",
       "name": "nothing",
       "file": "nothing.ts",
-      "expectedOutput": "=== Test getUserName: ===\nAlice\nundefined\n\n=== Test processValue: ===\nLongueur de la chaîne : 5\nValeur multipliée par 2 : 42\nType non reconnu\nType non reconnu\n\n=== Test logMessage: ===\nCeci est un message de test\nTypeScript est génial !",
-      "description": "Types spéciaux: null, undefined, unknown, void"
+      "expectedOutput": "=== Test getUserName: ===\nAlice\nnull\nAnonymous\n\n=== Test processValue: ===\nLongueur de la chaîne : 5\nValeur multipliée par 2 : 42\nType non reconnu\nType non reconnu\n\n=== Test logMessage: ===\nCeci est un message de test\nTypeScript est génial !",
+      "description": "Types spéciaux: null, undefined, unknown, void",
+      "useStandardizedTests": true,
+      "testCode": "// Standardized tests\nconsole.log(\"=== Test getUserName: ===\");\nconsole.log(getUserName({ name: \"Alice\" }));\nconsole.log(getUserName({}));\nconsole.log(getUserName({ name: null }));\n\nconsole.log(\"\\n=== Test processValue: ===\");\nprocessValue(\"Hello\");\nprocessValue(21);\nprocessValue(true);\nprocessValue({ key: \"value\" });\n\nconsole.log(\"\\n=== Test logMessage: ===\");\nlogMessage(\"Ceci est un message de test\");\nlogMessage(\"TypeScript est génial !\");"
     },
     {
       "id": "12",
@@ -184,7 +188,9 @@
       "name": "generic",
       "file": "generic.ts",
       "expectedOutput": "42\nHello Code2Work\n1\nAlice\nname : Alice\npromotion : 2026",
-      "description": "Fonctions génériques avec types T et K"
+      "description": "Fonctions génériques avec types T et K",
+      "useStandardizedTests": true,
+      "testCode": "// Standardized tests\nconsole.log(identity(42));\nconsole.log(identity(\"Hello Code2Work\"));\nconsole.log(getFirstElement([1, 2]));\nconsole.log(getFirstElement([\"Alice\", \"aux\", \"pays des merveilles\"]));\nconst etnaUser: EtnaUser = { id: \"1\", name: \"Alice\", promotion: 2026 };\nprintUserProperty(etnaUser, \"name\");\nprintUserProperty(etnaUser, \"promotion\");"
     }
   ]
 }
